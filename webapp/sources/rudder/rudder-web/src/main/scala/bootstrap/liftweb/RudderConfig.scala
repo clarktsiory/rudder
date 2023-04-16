@@ -105,6 +105,7 @@ import com.normation.rudder.campaigns.CampaignRepositoryImpl
 import com.normation.rudder.campaigns.CampaignSerializer
 import com.normation.rudder.campaigns.JSONReportsAnalyser
 import com.normation.rudder.campaigns.MainCampaignService
+import com.normation.rudder.configuration.ConfigurationRepository
 import com.normation.rudder.configuration.ConfigurationRepositoryImpl
 import com.normation.rudder.configuration.GroupRevisionRepository
 import com.normation.rudder.configuration.RuleRevisionRepository
@@ -986,73 +987,104 @@ object RudderConfig extends Loggable {
 
   // we need that to be the first thing, and take care of Exception so that the error is
   // human understandable when the directory is not up
-  val api = RudderConfigInit.init()
+  val rci = RudderConfigInit.init()
 
-  val roLDAPConnectionProvider:      LDAPConnectionProvider[RoLDAPConnection] = api.roLDAPConnectionProvider
-  val pendingNodesDit:               InventoryDit                             = api.pendingNodesDit
-  val acceptedNodesDit:              InventoryDit                             = api.acceptedNodesDit
-  val nodeDit:                       NodeDit                                  = api.nodeDit
-  val rudderDit:                     RudderDit                                = api.rudderDit
-  val roRuleRepository:              RoRuleRepository                         = api.roRuleRepository
-  val woRuleRepository:              WoRuleRepository                         = api.woRuleRepository
-  val woNodeRepository:              WoNodeRepository                         = api.woNodeRepository
-  val roNodeGroupRepository:         RoNodeGroupRepository                    = api.roNodeGroupRepository
-  val woNodeGroupRepository:         WoNodeGroupRepository                    = api.woNodeGroupRepository
-  val techniqueRepository:           TechniqueRepository                      = api.techniqueRepository
-  val updateTechniqueLibrary:        UpdateTechniqueLibrary                   = api.updateTechniqueLibrary
-  val roDirectiveRepository:         RoDirectiveRepository                    = api.roDirectiveRepository
-  val woDirectiveRepository:         WoDirectiveRepository                    = api.woDirectiveRepository
-  val readOnlySoftwareDAO:           ReadOnlySoftwareDAO                      = api.readOnlySoftwareDAO
-  val eventLogRepository:            EventLogRepository                       = api.eventLogRepository
-  val eventLogDetailsService:        EventLogDetailsService                   = api.eventLogDetailsService
-  val reportingService:              ReportingService                         = api.reportingService
-  val asyncComplianceService:        AsyncComplianceService                   = api.asyncComplianceService
-  val debugScript:                   DebugInfoService                         = api.debugScript
-  val uuidGen:                       StringUuidGenerator                      = api.uuidGen
-  val cmdbQueryParser:               CmdbQueryParser                          = api.cmdbQueryParser
-  val inventoryHistoryLogRepository: InventoryHistoryLogRepository            = api.inventoryHistoryLogRepository
-  val inventoryEventLogService:      InventoryEventLogService                 = api.inventoryEventLogService
-  val ruleApplicationStatus:         RuleApplicationStatusService             = api.ruleApplicationStatus
-  val propertyEngineService:         PropertyEngineService                    = api.propertyEngineService
-  val newNodeManager:                NewNodeManager                           = api.newNodeManager
-  val nodeGrid:                      NodeGrid                                 = api.nodeGrid
-  val nodeSummaryService:            NodeSummaryService                       = api.nodeSummaryService
-  val jsTreeUtilService:             JsTreeUtilService                        = api.jsTreeUtilService
-  val directiveEditorService:        DirectiveEditorService                   = api.directiveEditorService
-  val userPropertyService:           UserPropertyService                      = api.userPropertyService
-  val eventListDisplayer:            EventListDisplayer                       = api.eventListDisplayer
-  val asyncDeploymentAgent:          AsyncDeploymentActor                     = api.asyncDeploymentAgent
-  val policyServerManagementService: PolicyServerManagementService            = api.policyServerManagementService
-  val updateDynamicGroupsService:    DynGroupUpdaterService                   = api.updateDynamicGroupsService
-  val updateDynamicGroups:           UpdateDynamicGroups                      = api.updateDynamicGroups
-  val checkInventoryUpdate:          CheckInventoryUpdate                     = api.checkInventoryUpdate
-  val purgeDeletedInventories:       PurgeDeletedInventories                  = api.purgeDeletedInventories
-  val purgeUnreferencedSoftwares:    PurgeUnreferencedSoftwares               = api.purgeUnreferencedSoftwares
-  val databaseManager:               DatabaseManager                          = api.databaseManager
-  val automaticReportsCleaning:      AutomaticReportsCleaning                 = api.automaticReportsCleaning
-  val checkTechniqueLibrary:         CheckTechniqueLibrary                    = api.checkTechniqueLibrary
-  val automaticReportLogger:         AutomaticReportLogger                    = api.automaticReportLogger
-  val removeNodeService:             RemoveNodeService                        = api.removeNodeService
-  val nodeInfoService:               NodeInfoService                          = api.nodeInfoService
-  val reportDisplayer:               ReportDisplayer                          = api.reportDisplayer
-  val dependencyAndDeletionService:  DependencyAndDeletionService             = api.dependencyAndDeletionService
-  val itemArchiveManager:            ItemArchiveManager                       = api.itemArchiveManager
-  val personIdentService:            PersonIdentService                       = api.personIdentService
-  val gitRevisionProvider:           GitRevisionProvider                      = api.gitRevisionProvider
-  val logDisplayer:                  LogDisplayer                             = api.logDisplayer
-  val fullInventoryRepository:       LDAPFullInventoryRepository              = api.fullInventoryRepository
-  val acceptedNodeQueryProcessor:    QueryProcessor                           = api.acceptedNodeQueryProcessor
-  val categoryHierarchyDisplayer:    CategoryHierarchyDisplayer               = api.categoryHierarchyDisplayer
-  val dynGroupService:               DynGroupService                          = api.dynGroupService
-  val ditQueryData:                  DitQueryData                             = api.ditQueryData
-  val reportsRepository:             ReportsRepository                        = api.reportsRepository
-  val eventLogDeploymentService:     EventLogDeploymentService                = api.eventLogDeploymentService
-  val srvGrid:                       SrvGrid                                  = api.srvGrid
-  val findExpectedReportRepository:  FindExpectedReportRepository             = api.findExpectedReportRepository
-  val roApiAccountRepository:        RoApiAccountRepository                   = api.roApiAccountRepository
-  val woApiAccountRepository:        WoApiAccountRepository                   = api.woApiAccountRepository
-  val roAgentRunsRepository:         RoReportsExecutionRepository             = api.roAgentRunsRepository
-  val pendingNodeCheckGroup:         CheckPendingNodeInDynGroups              = api.pendingNodeCheckGroup
+  val roLDAPConnectionProvider:       LDAPConnectionProvider[RoLDAPConnection]   = rci.roLDAPConnectionProvider
+  val pendingNodesDit:                InventoryDit                               = rci.pendingNodesDit
+  val acceptedNodesDit:               InventoryDit                               = rci.acceptedNodesDit
+  val nodeDit:                        NodeDit                                    = rci.nodeDit
+  val rudderDit:                      RudderDit                                  = rci.rudderDit
+  val roRuleRepository:               RoRuleRepository                           = rci.roRuleRepository
+  val woRuleRepository:               WoRuleRepository                           = rci.woRuleRepository
+  val woNodeRepository:               WoNodeRepository                           = rci.woNodeRepository
+  val roNodeGroupRepository:          RoNodeGroupRepository                      = rci.roNodeGroupRepository
+  val woNodeGroupRepository:          WoNodeGroupRepository                      = rci.woNodeGroupRepository
+  val techniqueRepository:            TechniqueRepository                        = rci.techniqueRepository
+  val updateTechniqueLibrary:         UpdateTechniqueLibrary                     = rci.updateTechniqueLibrary
+  val roDirectiveRepository:          RoDirectiveRepository                      = rci.roDirectiveRepository
+  val woDirectiveRepository:          WoDirectiveRepository                      = rci.woDirectiveRepository
+  val readOnlySoftwareDAO:            ReadOnlySoftwareDAO                        = rci.readOnlySoftwareDAO
+  val eventLogRepository:             EventLogRepository                         = rci.eventLogRepository
+  val eventLogDetailsService:         EventLogDetailsService                     = rci.eventLogDetailsService
+  val reportingService:               ReportingService                           = rci.reportingService
+  val asyncComplianceService:         AsyncComplianceService                     = rci.asyncComplianceService
+  val debugScript:                    DebugInfoService                           = rci.debugScript
+  val uuidGen:                        StringUuidGenerator                        = rci.uuidGen
+  val cmdbQueryParser:                CmdbQueryParser                            = rci.cmdbQueryParser
+  val inventoryHistoryLogRepository:  InventoryHistoryLogRepository              = rci.inventoryHistoryLogRepository
+  val inventoryEventLogService:       InventoryEventLogService                   = rci.inventoryEventLogService
+  val ruleApplicationStatus:          RuleApplicationStatusService               = rci.ruleApplicationStatus
+  val propertyEngineService:          PropertyEngineService                      = rci.propertyEngineService
+  val newNodeManager:                 NewNodeManager                             = rci.newNodeManager
+  val nodeGrid:                       NodeGrid                                   = rci.nodeGrid
+  val nodeSummaryService:             NodeSummaryService                         = rci.nodeSummaryService
+  val jsTreeUtilService:              JsTreeUtilService                          = rci.jsTreeUtilService
+  val directiveEditorService:         DirectiveEditorService                     = rci.directiveEditorService
+  val userPropertyService:            UserPropertyService                        = rci.userPropertyService
+  val eventListDisplayer:             EventListDisplayer                         = rci.eventListDisplayer
+  val asyncDeploymentAgent:           AsyncDeploymentActor                       = rci.asyncDeploymentAgent
+  val policyServerManagementService:  PolicyServerManagementService              = rci.policyServerManagementService
+  val updateDynamicGroupsService:     DynGroupUpdaterService                     = rci.updateDynamicGroupsService
+  val updateDynamicGroups:            UpdateDynamicGroups                        = rci.updateDynamicGroups
+  val checkInventoryUpdate:           CheckInventoryUpdate                       = rci.checkInventoryUpdate
+  val purgeDeletedInventories:        PurgeDeletedInventories                    = rci.purgeDeletedInventories
+  val purgeUnreferencedSoftwares:     PurgeUnreferencedSoftwares                 = rci.purgeUnreferencedSoftwares
+  val databaseManager:                DatabaseManager                            = rci.databaseManager
+  val automaticReportsCleaning:       AutomaticReportsCleaning                   = rci.automaticReportsCleaning
+  val checkTechniqueLibrary:          CheckTechniqueLibrary                      = rci.checkTechniqueLibrary
+  val automaticReportLogger:          AutomaticReportLogger                      = rci.automaticReportLogger
+  val removeNodeService:              RemoveNodeService                          = rci.removeNodeService
+  val nodeInfoService:                NodeInfoService                            = rci.nodeInfoService
+  val reportDisplayer:                ReportDisplayer                            = rci.reportDisplayer
+  val dependencyAndDeletionService:   DependencyAndDeletionService               = rci.dependencyAndDeletionService
+  val itemArchiveManager:             ItemArchiveManager                         = rci.itemArchiveManager
+  val personIdentService:             PersonIdentService                         = rci.personIdentService
+  val gitRevisionProvider:            GitRevisionProvider                        = rci.gitRevisionProvider
+  val logDisplayer:                   LogDisplayer                               = rci.logDisplayer
+  val fullInventoryRepository:        LDAPFullInventoryRepository                = rci.fullInventoryRepository
+  val acceptedNodeQueryProcessor:     QueryProcessor                             = rci.acceptedNodeQueryProcessor
+  val categoryHierarchyDisplayer:     CategoryHierarchyDisplayer                 = rci.categoryHierarchyDisplayer
+  val dynGroupService:                DynGroupService                            = rci.dynGroupService
+  val ditQueryData:                   DitQueryData                               = rci.ditQueryData
+  val reportsRepository:              ReportsRepository                          = rci.reportsRepository
+  val eventLogDeploymentService:      EventLogDeploymentService                  = rci.eventLogDeploymentService
+  val srvGrid:                        SrvGrid                                    = rci.srvGrid
+  val findExpectedReportRepository:   FindExpectedReportRepository               = rci.findExpectedReportRepository
+  val roApiAccountRepository:         RoApiAccountRepository                     = rci.roApiAccountRepository
+  val woApiAccountRepository:         WoApiAccountRepository                     = rci.woApiAccountRepository
+  val roAgentRunsRepository:          RoReportsExecutionRepository               = rci.roAgentRunsRepository
+  val pendingNodeCheckGroup:          CheckPendingNodeInDynGroups                = rci.pendingNodeCheckGroup
+  val authenticationProviders:        AuthBackendProvidersManager                = rci.authenticationProviders
+  val rudderUserListProvider:         FileUserDetailListProvider                 = rci.rudderUserListProvider
+  val restApiAccounts:                RestApiAccounts                            = rci.restApiAccounts
+  val restQuicksearch:                RestQuicksearch                            = rci.restQuicksearch
+  val restCompletion:                 RestCompletion                             = rci.restCompletion
+  val sharedFileApi:                  SharedFilesAPI                             = rci.sharedFileApi
+  val eventLogApi:                    EventLogAPI                                = rci.eventLogApi
+  val stringUuidGenerator:            StringUuidGenerator                        = rci.stringUuidGenerator
+  val inventoryWatcher:               InventoryFileWatcher                       = rci.inventoryWatcher
+  val configService:                  ReadConfigService with UpdateConfigService = rci.configService
+  val historizeNodeCountBatch:        IOResult[Unit]                             = rci.historizeNodeCountBatch
+  val policyGenerationBootGuard:      zio.Promise[Nothing, Unit]                 = rci.policyGenerationBootGuard
+  val healthcheckNotificationService: HealthcheckNotificationService             = rci.healthcheckNotificationService
+  val jsonPluginDefinition:           ReadPluginPackageInfo                      = rci.jsonPluginDefinition
+  val rudderApi:                      LiftHandler                                = rci.rudderApi
+  val authorizationApiMapping:        ExtensibleAuthorizationApiMapping          = rci.authorizationApiMapping
+  val roRuleCategoryRepository:       RoRuleCategoryRepository                   = rci.roRuleCategoryRepository
+  val woRuleCategoryRepository:       WoRuleCategoryRepository                   = rci.woRuleCategoryRepository
+  val workflowLevelService:           WorkflowLevelService                       = rci.workflowLevelService
+  val ncfTechniqueReader:             ncf.TechniqueReader                        = rci.ncfTechniqueReader
+  val recentChangesService:           NodeChangesService                         = rci.recentChangesService
+  val ruleCategoryService:            RuleCategoryService                        = rci.ruleCategoryService
+  val restExtractorService:           RestExtractorService                       = rci.restExtractorService
+  val snippetExtensionRegister:       SnippetExtensionRegister                   = rci.snippetExtensionRegister
+  val clearCacheService:              ClearCacheService                          = rci.clearCacheService
+  val linkUtil:                       LinkUtil                                   = rci.linkUtil
+  val userService:                    UserService                                = rci.userService
+  val ApiVersions:                    List[ApiVersion]                           = rci.apiVersions
+  val apiDispatcher:                  RudderEndpointDispatcher                   = rci.apiDispatcher
+  val configurationRepository:        ConfigurationRepository                    = rci.configurationRepository
+  val roParameterService:             RoParameterService                         = rci.roParameterService
 
   /**
    * A method to call to force initialisation of all object and services.
@@ -1071,7 +1103,7 @@ object RudderConfig extends Loggable {
       ////////// bootstraps checks //////////
       // they must be out of Lift boot() because that method
       // is encapsulated in a try/catch ( see net.liftweb.http.provider.HTTPProvider.bootLift )
-      api.allBootstrapChecks.checks()
+      rci.allBootstrapChecks.checks()
     }
   }
 
@@ -1082,72 +1114,103 @@ object RudderConfig extends Loggable {
  * to RudderConfig
  */
 case class RudderServiceApi(
-    roLDAPConnectionProvider:      LDAPConnectionProvider[RoLDAPConnection],
-    pendingNodesDit:               InventoryDit,
-    acceptedNodesDit:              InventoryDit,
-    nodeDit:                       NodeDit,
-    rudderDit:                     RudderDit,
-    roRuleRepository:              RoRuleRepository,
-    woRuleRepository:              WoRuleRepository,
-    woNodeRepository:              WoNodeRepository,
-    roNodeGroupRepository:         RoNodeGroupRepository,
-    woNodeGroupRepository:         WoNodeGroupRepository,
-    techniqueRepository:           TechniqueRepository,
-    updateTechniqueLibrary:        UpdateTechniqueLibrary,
-    roDirectiveRepository:         RoDirectiveRepository,
-    woDirectiveRepository:         WoDirectiveRepository,
-    readOnlySoftwareDAO:           ReadOnlySoftwareDAO,
-    eventLogRepository:            EventLogRepository,
-    eventLogDetailsService:        EventLogDetailsService,
-    reportingService:              ReportingService,
-    asyncComplianceService:        AsyncComplianceService,
-    debugScript:                   DebugInfoService,
-    uuidGen:                       StringUuidGenerator,
-    cmdbQueryParser:               CmdbQueryParser,
-    inventoryHistoryLogRepository: InventoryHistoryLogRepository,
-    inventoryEventLogService:      InventoryEventLogService,
-    ruleApplicationStatus:         RuleApplicationStatusService,
-    propertyEngineService:         PropertyEngineService,
-    newNodeManager:                NewNodeManager,
-    nodeGrid:                      NodeGrid,
-    nodeSummaryService:            NodeSummaryService,
-    jsTreeUtilService:             JsTreeUtilService,
-    directiveEditorService:        DirectiveEditorService,
-    userPropertyService:           UserPropertyService,
-    eventListDisplayer:            EventListDisplayer,
-    asyncDeploymentAgent:          AsyncDeploymentActor,
-    policyServerManagementService: PolicyServerManagementService,
-    updateDynamicGroupsService:    DynGroupUpdaterService,
-    updateDynamicGroups:           UpdateDynamicGroups,
-    checkInventoryUpdate:          CheckInventoryUpdate,
-    purgeDeletedInventories:       PurgeDeletedInventories,
-    purgeUnreferencedSoftwares:    PurgeUnreferencedSoftwares,
-    databaseManager:               DatabaseManager,
-    automaticReportsCleaning:      AutomaticReportsCleaning,
-    checkTechniqueLibrary:         CheckTechniqueLibrary,
-    automaticReportLogger:         AutomaticReportLogger,
-    removeNodeService:             RemoveNodeService,
-    nodeInfoService:               NodeInfoService,
-    reportDisplayer:               ReportDisplayer,
-    dependencyAndDeletionService:  DependencyAndDeletionService,
-    itemArchiveManager:            ItemArchiveManager,
-    personIdentService:            PersonIdentService,
-    gitRevisionProvider:           GitRevisionProvider,
-    logDisplayer:                  LogDisplayer,
-    fullInventoryRepository:       LDAPFullInventoryRepository,
-    acceptedNodeQueryProcessor:    QueryProcessor,
-    categoryHierarchyDisplayer:    CategoryHierarchyDisplayer,
-    dynGroupService:               DynGroupService,
-    ditQueryData:                  DitQueryData,
-    reportsRepository:             ReportsRepository,
-    eventLogDeploymentService:     EventLogDeploymentService,
-    srvGrid:                       SrvGrid,
-    findExpectedReportRepository:  FindExpectedReportRepository,
-    roApiAccountRepository:        RoApiAccountRepository,
-    woApiAccountRepository:        WoApiAccountRepository,
-    roAgentRunsRepository:         RoReportsExecutionRepository,
-    pendingNodeCheckGroup:         CheckPendingNodeInDynGroups,
-    allBootstrapChecks:            BootstrapChecks
+    roLDAPConnectionProvider:       LDAPConnectionProvider[RoLDAPConnection],
+    pendingNodesDit:                InventoryDit,
+    acceptedNodesDit:               InventoryDit,
+    nodeDit:                        NodeDit,
+    rudderDit:                      RudderDit,
+    roRuleRepository:               RoRuleRepository,
+    woRuleRepository:               WoRuleRepository,
+    woNodeRepository:               WoNodeRepository,
+    roNodeGroupRepository:          RoNodeGroupRepository,
+    woNodeGroupRepository:          WoNodeGroupRepository,
+    techniqueRepository:            TechniqueRepository,
+    updateTechniqueLibrary:         UpdateTechniqueLibrary,
+    roDirectiveRepository:          RoDirectiveRepository,
+    woDirectiveRepository:          WoDirectiveRepository,
+    readOnlySoftwareDAO:            ReadOnlySoftwareDAO,
+    eventLogRepository:             EventLogRepository,
+    eventLogDetailsService:         EventLogDetailsService,
+    reportingService:               ReportingService,
+    asyncComplianceService:         AsyncComplianceService,
+    debugScript:                    DebugInfoService,
+    uuidGen:                        StringUuidGenerator,
+    cmdbQueryParser:                CmdbQueryParser,
+    inventoryHistoryLogRepository:  InventoryHistoryLogRepository,
+    inventoryEventLogService:       InventoryEventLogService,
+    ruleApplicationStatus:          RuleApplicationStatusService,
+    propertyEngineService:          PropertyEngineService,
+    newNodeManager:                 NewNodeManager,
+    nodeGrid:                       NodeGrid,
+    nodeSummaryService:             NodeSummaryService,
+    jsTreeUtilService:              JsTreeUtilService,
+    directiveEditorService:         DirectiveEditorService,
+    userPropertyService:            UserPropertyService,
+    eventListDisplayer:             EventListDisplayer,
+    asyncDeploymentAgent:           AsyncDeploymentActor,
+    policyServerManagementService:  PolicyServerManagementService,
+    updateDynamicGroupsService:     DynGroupUpdaterService,
+    updateDynamicGroups:            UpdateDynamicGroups,
+    checkInventoryUpdate:           CheckInventoryUpdate,
+    purgeDeletedInventories:        PurgeDeletedInventories,
+    purgeUnreferencedSoftwares:     PurgeUnreferencedSoftwares,
+    databaseManager:                DatabaseManager,
+    automaticReportsCleaning:       AutomaticReportsCleaning,
+    checkTechniqueLibrary:          CheckTechniqueLibrary,
+    automaticReportLogger:          AutomaticReportLogger,
+    removeNodeService:              RemoveNodeService,
+    nodeInfoService:                NodeInfoService,
+    reportDisplayer:                ReportDisplayer,
+    dependencyAndDeletionService:   DependencyAndDeletionService,
+    itemArchiveManager:             ItemArchiveManager,
+    personIdentService:             PersonIdentService,
+    gitRevisionProvider:            GitRevisionProvider,
+    logDisplayer:                   LogDisplayer,
+    fullInventoryRepository:        LDAPFullInventoryRepository,
+    acceptedNodeQueryProcessor:     QueryProcessor,
+    categoryHierarchyDisplayer:     CategoryHierarchyDisplayer,
+    dynGroupService:                DynGroupService,
+    ditQueryData:                   DitQueryData,
+    reportsRepository:              ReportsRepository,
+    eventLogDeploymentService:      EventLogDeploymentService,
+    srvGrid:                        SrvGrid,
+    findExpectedReportRepository:   FindExpectedReportRepository,
+    roApiAccountRepository:         RoApiAccountRepository,
+    woApiAccountRepository:         WoApiAccountRepository,
+    roAgentRunsRepository:          RoReportsExecutionRepository,
+    pendingNodeCheckGroup:          CheckPendingNodeInDynGroups,
+    allBootstrapChecks:             BootstrapChecks,
+    authenticationProviders:        AuthBackendProvidersManager,
+    rudderUserListProvider:         FileUserDetailListProvider,
+    restApiAccounts:                RestApiAccounts,
+    restQuicksearch:                RestQuicksearch,
+    restCompletion:                 RestCompletion,
+    sharedFileApi:                  SharedFilesAPI,
+    eventLogApi:                    EventLogAPI,
+    stringUuidGenerator:            StringUuidGenerator,
+    inventoryWatcher:               InventoryFileWatcher,
+    configService:                  ReadConfigService with UpdateConfigService,
+    historizeNodeCountBatch:        IOResult[Unit],
+    policyGenerationBootGuard:      zio.Promise[Nothing, Unit],
+    healthcheckNotificationService: HealthcheckNotificationService,
+    jsonPluginDefinition:           ReadPluginPackageInfo,
+    rudderApi:                      LiftHandler,
+    authorizationApiMapping:        ExtensibleAuthorizationApiMapping,
+    roRuleCategoryRepository:       RoRuleCategoryRepository,
+    woRuleCategoryRepository:       WoRuleCategoryRepository,
+    workflowLevelService:           WorkflowLevelService,
+    ncfTechniqueReader:             ncf.TechniqueReader,
+    recentChangesService:           NodeChangesService,
+    ruleCategoryService:            RuleCategoryService,
+    restExtractorService:           RestExtractorService,
+    snippetExtensionRegister:       SnippetExtensionRegister,
+    clearCacheService:              ClearCacheService,
+    linkUtil:                       LinkUtil,
+    userService:                    UserService,
+    apiVersions:                    List[ApiVersion],
+    apiDispatcher:                  RudderEndpointDispatcher,
+    configurationRepository:        ConfigurationRepository,
+    roParameterService:             RoParameterService
 )
 
 /*
@@ -1178,9 +1241,11 @@ object RudderConfigInit {
 
     lazy val writeAllAgentSpecificFiles = new WriteAllAgentSpecificFiles(agentRegister)
 
-    val ldapInventoryMapper = inventoryMapper
+    lazy val ldapInventoryMapper = inventoryMapper
 
-    val pluginSettingsService = new FilePluginSettingsService(root / "opt" / "rudder" / "etc" / "rudder-pkg" / "rudder-pkg.conf")
+    lazy val pluginSettingsService = new FilePluginSettingsService(
+      root / "opt" / "rudder" / "etc" / "rudder-pkg" / "rudder-pkg.conf"
+    )
 
     /////////////////////////////////////////////////
     ////////// pluggable service providers //////////
@@ -1232,12 +1297,12 @@ object RudderConfigInit {
       }
     }
 
-    val roRuleCategoryRepository: RoRuleCategoryRepository = roLDAPRuleCategoryRepository
-    val ruleCategoryService:      RuleCategoryService      = new RuleCategoryService()
-    val woRuleCategoryRepository: WoRuleCategoryRepository = woLDAPRuleCategoryRepository
+    lazy val roRuleCategoryRepository: RoRuleCategoryRepository = roLDAPRuleCategoryRepository
+    lazy val ruleCategoryService:      RuleCategoryService      = new RuleCategoryService()
+    lazy val woRuleCategoryRepository: WoRuleCategoryRepository = woLDAPRuleCategoryRepository
 
-    val changeRequestEventLogService: ChangeRequestEventLogService = new ChangeRequestEventLogServiceImpl(eventLogRepository)
-    val secretEventLogService:        SecretEventLogService        = new SecretEventLogServiceImpl(eventLogRepository)
+    lazy val changeRequestEventLogService: ChangeRequestEventLogService = new ChangeRequestEventLogServiceImpl(eventLogRepository)
+    lazy val secretEventLogService:        SecretEventLogService        = new SecretEventLogServiceImpl(eventLogRepository)
 
     lazy val xmlSerializer = XmlSerializerImpl(
       ruleSerialisation,
@@ -1247,19 +1312,19 @@ object RudderConfigInit {
       ruleCategorySerialisation
     )
 
-    lazy val xmlUnserializer    = XmlUnserializerImpl(
+    lazy val xmlUnserializer         = XmlUnserializerImpl(
       ruleUnserialisation,
       directiveUnserialisation,
       nodeGroupUnserialisation,
       globalParameterUnserialisation,
       ruleCategoryUnserialisation
     )
-    val workflowEventLogService = new WorkflowEventLogServiceImpl(eventLogRepository, uuidGen)
-    val diffService: DiffService = new DiffServiceImpl()
+    lazy val workflowEventLogService = new WorkflowEventLogServiceImpl(eventLogRepository, stringUuidGenerator)
+    lazy val diffService: DiffService = new DiffServiceImpl()
     lazy val diffDisplayer = new DiffDisplayer(linkUtil)
     lazy val commitAndDeployChangeRequest: CommitAndDeployChangeRequestService = {
       new CommitAndDeployChangeRequestServiceImpl(
-        uuidGen,
+        stringUuidGenerator,
         roDirectiveRepository,
         woDirectiveRepository,
         roNodeGroupRepository,
@@ -1278,14 +1343,14 @@ object RudderConfigInit {
       )
     }
 
-    val roParameterService: RoParameterService = roParameterServiceImpl
-    val woParameterService: WoParameterService = woParameterServiceImpl
+    lazy val roParameterService: RoParameterService = roParameterServiceImpl
+    lazy val woParameterService: WoParameterService = woParameterServiceImpl
 
     //////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////// REST ///////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    val restExtractorService = {
+    lazy val restExtractorService = {
       RestExtractorService(
         roRuleRepository,
         roDirectiveRepository,
@@ -1294,22 +1359,22 @@ object RudderConfigInit {
         queryParser,
         userPropertyService,
         workflowLevelService,
-        uuidGen,
+        stringUuidGenerator,
         typeParameterService
       )
     }
 
-    val zioJsonExtractor = new ZioJsonExtractor(queryParser)
+    lazy val zioJsonExtractor = new ZioJsonExtractor(queryParser)
 
     lazy val tokenGenerator = new TokenGeneratorImpl(32)
 
-    implicit val userService = new UserService {
+    implicit lazy val userService = new UserService {
       def getCurrentUser = CurrentUser
     }
 
-    val ncfTechniqueReader: ncf.TechniqueReader = new ncf.TechniqueReader(
+    lazy val ncfTechniqueReader: ncf.TechniqueReader = new ncf.TechniqueReader(
       restExtractorService,
-      uuidGen,
+      stringUuidGenerator,
       personIdentService,
       gitConfigRepo,
       prettyPrinter,
@@ -1318,22 +1383,22 @@ object RudderConfigInit {
       RUDDER_GROUP_OWNER_CONFIG_REPO
     )
 
-    val techniqueSerializer = new TechniqueSerializer(typeParameterService)
+    lazy val techniqueSerializer = new TechniqueSerializer(typeParameterService)
 
-    lazy val linkUtil      = new LinkUtil(roRuleRepository, roNodeGroupRepository, roDirectiveRepository, nodeInfoServiceImpl)
+    lazy val linkUtil           = new LinkUtil(roRuleRepository, roNodeGroupRepository, roDirectiveRepository, nodeInfoServiceImpl)
     // REST API
-    val restApiAccounts    = new RestApiAccounts(
+    lazy val restApiAccounts    = new RestApiAccounts(
       roApiAccountRepository,
       woApiAccountRepository,
       restExtractorService,
       tokenGenerator,
-      uuidGen,
+      stringUuidGenerator,
       userService,
       apiAuthorizationLevelService
     )
-    val restDataSerializer = RestDataSerializerImpl(techniqueRepository, diffService)
+    lazy val restDataSerializer = RestDataSerializerImpl(techniqueRepository, diffService)
 
-    val restQuicksearch = new RestQuicksearch(
+    lazy val restQuicksearch = new RestQuicksearch(
       new FullQuickSearchService()(
         roLdap,
         nodeDit,
@@ -1345,13 +1410,13 @@ object RudderConfigInit {
       userService,
       linkUtil
     )
-    val restCompletion  = new RestCompletion(new RestCompletionService(roDirectiveRepository, roRuleRepository))
+    lazy val restCompletion  = new RestCompletion(new RestCompletionService(roDirectiveRepository, roRuleRepository))
 
-    val ruleApiService2 = {
+    lazy val ruleApiService2 = {
       new RuleApiService2(
         roRuleRepository,
         woRuleRepository,
-        uuidGen,
+        stringUuidGenerator,
         asyncDeploymentAgent,
         workflowLevelService,
         restExtractorService,
@@ -1359,7 +1424,7 @@ object RudderConfigInit {
       )
     }
 
-    val ruleApiService6  = {
+    lazy val ruleApiService6  = {
       new RuleApiService6(
         roRuleCategoryRepository,
         roRuleRepository,
@@ -1367,12 +1432,12 @@ object RudderConfigInit {
         restDataSerializer
       )
     }
-    val ruleApiService13 = {
+    lazy val ruleApiService13 = {
       new RuleApiService14(
         roRuleRepository,
         woRuleRepository,
         configurationRepository,
-        uuidGen,
+        stringUuidGenerator,
         asyncDeploymentAgent,
         workflowLevelService,
         roRuleCategoryRepository,
@@ -1385,11 +1450,11 @@ object RudderConfigInit {
       )
     }
 
-    val directiveApiService2 = {
+    lazy val directiveApiService2 = {
       new DirectiveApiService2(
         roDirectiveRepository,
         woDirectiveRepository,
-        uuidGen,
+        stringUuidGenerator,
         asyncDeploymentAgent,
         workflowLevelService,
         restExtractorService,
@@ -1399,12 +1464,12 @@ object RudderConfigInit {
       )
     }
 
-    val directiveApiService14 = {
+    lazy val directiveApiService14 = {
       new DirectiveApiService14(
         roDirectiveRepository,
         configurationRepository,
         woDirectiveRepository,
-        uuidGen,
+        stringUuidGenerator,
         asyncDeploymentAgent,
         workflowLevelService,
         directiveEditorService,
@@ -1413,14 +1478,14 @@ object RudderConfigInit {
       )
     }
 
-    val techniqueApiService6 = {
+    lazy val techniqueApiService6 = {
       new TechniqueAPIService6(
         roDirectiveRepository,
         restDataSerializer
       )
     }
 
-    val techniqueApiService14 = {
+    lazy val techniqueApiService14 = {
       new TechniqueAPIService14(
         roDirectiveRepository,
         gitParseTechniqueLibrary,
@@ -1430,11 +1495,11 @@ object RudderConfigInit {
       )
     }
 
-    val groupApiService2 = {
+    lazy val groupApiService2 = {
       new GroupApiService2(
         roNodeGroupRepository,
         woNodeGroupRepository,
-        uuidGen,
+        stringUuidGenerator,
         asyncDeploymentAgent,
         workflowLevelService,
         restExtractorService,
@@ -1443,7 +1508,7 @@ object RudderConfigInit {
       )
     }
 
-    val groupApiService6 = {
+    lazy val groupApiService6 = {
       new GroupApiService6(
         roNodeGroupRepository,
         woNodeGroupRepository,
@@ -1451,12 +1516,12 @@ object RudderConfigInit {
       )
     }
 
-    val groupApiService14 = {
+    lazy val groupApiService14 = {
       new GroupApiService14(
         roNodeGroupRepository,
         woNodeGroupRepository,
         roLDAPParameterRepository,
-        uuidGen,
+        stringUuidGenerator,
         asyncDeploymentAgent,
         workflowLevelService,
         restExtractorService,
@@ -1466,43 +1531,43 @@ object RudderConfigInit {
       )
     }
 
-    val nodeApiService2 = new NodeApiService2(
+    lazy val nodeApiService2 = new NodeApiService2(
       newNodeManager,
       nodeInfoService,
       removeNodeService,
-      uuidGen,
+      stringUuidGenerator,
       restExtractorService,
       restDataSerializer
     )
 
-    val nodeApiService4 = new NodeApiService4(
+    lazy val nodeApiService4 = new NodeApiService4(
       fullInventoryRepository,
       nodeInfoService,
       readOnlySoftwareDAO,
-      uuidGen,
+      stringUuidGenerator,
       restExtractorService,
       restDataSerializer,
       roAgentRunsRepository
     )
 
-    val nodeApiService8 = {
+    lazy val nodeApiService8 = {
       new NodeApiService8(
         woNodeRepository,
         nodeInfoService,
-        uuidGen,
+        stringUuidGenerator,
         asyncDeploymentAgent,
         RUDDER_RELAY_API,
         userService
       )
     }
 
-    val nodeApiService12 = new NodeApiService12(
+    lazy val nodeApiService12 = new NodeApiService12(
       removeNodeService,
-      uuidGen,
+      stringUuidGenerator,
       restDataSerializer
     )
 
-    val nodeApiService6 = new NodeApiService6(
+    lazy val nodeApiService6 = new NodeApiService6(
       nodeInfoService,
       fullInventoryRepository,
       readOnlySoftwareDAO,
@@ -1513,7 +1578,7 @@ object RudderConfigInit {
       roAgentRunsRepository
     )
 
-    val nodeApiService13 = new NodeApiService13(
+    lazy val nodeApiService13 = new NodeApiService13(
       nodeInfoService,
       cachedAgentRunRepository,
       readOnlySoftwareDAO,
@@ -1524,43 +1589,43 @@ object RudderConfigInit {
       roLDAPParameterRepository
     )
 
-    val nodeApiService16 = new NodeApiService15(
+    lazy val nodeApiService16 = new NodeApiService15(
       fullInventoryRepository,
       rwLdap,
       ldapEntityMapper,
       newNodeManager,
-      uuidGen,
+      stringUuidGenerator,
       nodeDit,
       pendingNodesDit,
       acceptedNodesDit
     )
 
-    val parameterApiService2  = {
+    lazy val parameterApiService2  = {
       new ParameterApiService2(
         roLDAPParameterRepository,
         woLDAPParameterRepository,
-        uuidGen,
+        stringUuidGenerator,
         workflowLevelService,
         restExtractorService,
         restDataSerializer
       )
     }
-    val parameterApiService14 = {
+    lazy val parameterApiService14 = {
       new ParameterApiService14(
         roLDAPParameterRepository,
         woLDAPParameterRepository,
-        uuidGen,
+        stringUuidGenerator,
         workflowLevelService
       )
     }
 
     // System API
 
-    val clearCacheService = new ClearCacheServiceImpl(
+    lazy val clearCacheService = new ClearCacheServiceImpl(
       nodeConfigurationHashRepo,
       asyncDeploymentAgent,
       eventLogRepository,
-      uuidGen,
+      stringUuidGenerator,
       Seq(
         cachedAgentRunRepository,
         recentChangesService,
@@ -1569,30 +1634,30 @@ object RudderConfigInit {
       )
     )
 
-    val hookApiService = new HookApiService(HOOKS_D, HOOKS_IGNORE_SUFFIXES)
+    lazy val hookApiService = new HookApiService(HOOKS_D, HOOKS_IGNORE_SUFFIXES)
 
-    val systemApiService11 = new SystemApiService11(
+    lazy val systemApiService11 = new SystemApiService11(
       updateTechniqueLibrary,
       debugScript,
       clearCacheService,
       asyncDeploymentAgent,
-      uuidGen,
+      stringUuidGenerator,
       updateDynamicGroups,
       itemArchiveManager,
       personIdentService,
       gitConfigRepo
     )
 
-    val systemApiService13 = new SystemApiService13(
+    lazy val systemApiService13 = new SystemApiService13(
       healthcheckService,
       healthcheckNotificationService,
       restDataSerializer,
       softwareService
     )
 
-    val ruleInternalApiService = new RuleInternalApiService(roRuleRepository, roNodeGroupRepository, nodeInfoService)
+    lazy val ruleInternalApiService = new RuleInternalApiService(roRuleRepository, roNodeGroupRepository, nodeInfoService)
 
-    val complianceAPIService = new ComplianceAPIService(
+    lazy val complianceAPIService = new ComplianceAPIService(
       roRuleRepository,
       nodeInfoService,
       roNodeGroupRepository,
@@ -1601,7 +1666,7 @@ object RudderConfigInit {
       () => globalComplianceModeService.getGlobalComplianceMode
     )
 
-    val techniqueArchiver = new TechniqueArchiverImpl(
+    lazy val techniqueArchiver = new TechniqueArchiverImpl(
       gitConfigRepo,
       prettyPrinter,
       gitModificationRepository,
@@ -1609,7 +1674,7 @@ object RudderConfigInit {
       techniqueParser,
       RUDDER_GROUP_OWNER_CONFIG_REPO
     )
-    val ncfTechniqueWriter: TechniqueWriter = new TechniqueWriterImpl(
+    lazy val ncfTechniqueWriter: TechniqueWriter = new TechniqueWriterImpl(
       techniqueArchiver,
       updateTechniqueLibrary,
       interpolationCompiler,
@@ -1626,7 +1691,7 @@ object RudderConfigInit {
     lazy val pipelinedInventoryParser: InventoryParser = {
       val fusionReportParser = {
         new FusionInventoryParser(
-          uuidGen,
+          stringUuidGenerator,
           rootParsingExtensions = Nil,
           contentParsingExtensions = Nil,
           ignoreProcesses = INVENTORIES_IGNORE_PROCESSES
@@ -1642,7 +1707,7 @@ object RudderConfigInit {
     }
 
     lazy val automaticMerger: PreCommit = new UuidMergerPreCommit(
-      uuidGen,
+      stringUuidGenerator,
       acceptedNodesDit,
       new NodeInventoryDNFinderService(
         Seq(
@@ -1789,7 +1854,7 @@ object RudderConfigInit {
     }
     cleanOldInventoryBatch.start()
 
-    val archiveApi = {
+    lazy val archiveApi = {
       val archiveBuilderService =
         new ZipArchiveBuilderService(new FileArchiveNameService(), configurationRepository, gitParseTechniqueLibrary)
       // fixe archive name to make it simple to test
@@ -1827,7 +1892,7 @@ object RudderConfigInit {
      * - 5.2[.0~.4]: 15
      * - 5.2.5: 16
      */
-    val ApiVersions = {
+    lazy val ApiVersions: List[ApiVersion] = {
       ApiVersion(12, true) ::  // rudder 6.0, 6.1
       ApiVersion(13, true) ::  // rudder 6.2
       ApiVersion(14, false) :: // rudder 7.0
@@ -1837,11 +1902,11 @@ object RudderConfigInit {
       Nil
     }
 
-    val jsonPluginDefinition = new ReadPluginPackageInfo("/var/rudder/packages/index.json")
+    lazy val jsonPluginDefinition = new ReadPluginPackageInfo("/var/rudder/packages/index.json")
 
-    val resourceFileService = new ResourceFileService(gitConfigRepo)
-    lazy val apiDispatcher  = new RudderEndpointDispatcher(LiftApiProcessingLogger)
-    lazy val rudderApi      = {
+    lazy val resourceFileService = new ResourceFileService(gitConfigRepo)
+    lazy val apiDispatcher       = new RudderEndpointDispatcher(LiftApiProcessingLogger)
+    lazy val rudderApi           = {
       import com.normation.rudder.rest.lift._
 
       val nodeInheritedProperties  =
@@ -1854,7 +1919,7 @@ object RudderConfigInit {
         campaignEventRepo,
         mainCampaignService,
         restExtractorService,
-        uuidGen
+        stringUuidGenerator
       )
       val modules     = List(
         new ComplianceApi(restExtractorService, complianceAPIService, roDirectiveRepository),
@@ -1862,7 +1927,7 @@ object RudderConfigInit {
           roLdapNodeGroupRepository,
           restExtractorService,
           zioJsonExtractor,
-          uuidGen,
+          stringUuidGenerator,
           groupApiService2,
           groupApiService6,
           groupApiService14,
@@ -1872,7 +1937,7 @@ object RudderConfigInit {
           roDirectiveRepository,
           restExtractorService,
           zioJsonExtractor,
-          uuidGen,
+          stringUuidGenerator,
           directiveApiService2,
           directiveApiService14
         ),
@@ -1894,7 +1959,7 @@ object RudderConfigInit {
           restExtractorService,
           configService,
           asyncDeploymentAgent,
-          uuidGen,
+          stringUuidGenerator,
           policyServerManagementService,
           nodeInfoService
         ),
@@ -1906,7 +1971,7 @@ object RudderConfigInit {
           ncfTechniqueReader,
           techniqueRepository,
           techniqueSerializer,
-          uuidGen,
+          stringUuidGenerator,
           resourceFileService
         ),
         new RuleApi(
@@ -1915,7 +1980,7 @@ object RudderConfigInit {
           ruleApiService2,
           ruleApiService6,
           ruleApiService13,
-          uuidGen
+          stringUuidGenerator
         ),
         new SystemApi(
           restExtractorService,
@@ -1946,13 +2011,13 @@ object RudderConfigInit {
     }
 
     // Internal APIs
-    val sharedFileApi          = new SharedFilesAPI(restExtractorService, RUDDER_DIR_SHARED_FILES_FOLDER)
-    val eventLogApi            = new EventLogAPI(eventLogRepository, restExtractorService, eventLogDetailsGenerator, personIdentService)
+    lazy val sharedFileApi     = new SharedFilesAPI(restExtractorService, RUDDER_DIR_SHARED_FILES_FOLDER)
+    lazy val eventLogApi       = new EventLogAPI(eventLogRepository, restExtractorService, eventLogDetailsGenerator, personIdentService)
     lazy val asyncWorkflowInfo = new AsyncWorkflowInfo
     lazy val configService: ReadConfigService with UpdateConfigService = {
       new GenericConfigService(
         RudderProperties.config,
-        new LdapConfigRepository(rudderDit, rwLdap, ldapEntityMapper, eventLogRepository, uuidGen),
+        new LdapConfigRepository(rudderDit, rwLdap, ldapEntityMapper, eventLogRepository, stringUuidGenerator),
         asyncWorkflowInfo,
         workflowLevelService
       )
@@ -1965,7 +2030,6 @@ object RudderConfigInit {
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
-
 
     //
     // Concrete implementation.
@@ -2040,7 +2104,7 @@ object RudderConfigInit {
     lazy val nodeDit:             NodeDit             = new NodeDit(LDAP_BASEDN)
     lazy val inventoryDitService: InventoryDitService =
       new InventoryDitServiceImpl(pendingNodesDit, acceptedNodesDit, removedNodesDitImpl)
-    lazy val uuidGen:             StringUuidGenerator = new StringUuidGeneratorImpl
+    lazy val stringUuidGenerator: StringUuidGenerator = new StringUuidGeneratorImpl
     lazy val systemVariableSpecService = new SystemVariableSpecServiceImpl()
     lazy val ldapEntityMapper: LDAPEntityMapper =
       new LDAPEntityMapper(rudderDit, nodeDit, acceptedNodesDit, queryParser, inventoryMapper)
@@ -2293,7 +2357,7 @@ object RudderConfigInit {
     )
     lazy val dynGroupServiceImpl   = new DynGroupServiceImpl(rudderDit, roLdap, ldapEntityMapper)
 
-    val pendingNodeCheckGroup = new CheckPendingNodeInDynGroups(inventoryQueryChecker)
+    lazy val pendingNodeCheckGroup = new CheckPendingNodeInDynGroups(inventoryQueryChecker)
 
     lazy val fullInventoryRepository =
       new FullInventoryRepositoryImpl(inventoryDitService, inventoryMapper, rwLdap)
@@ -2340,7 +2404,7 @@ object RudderConfigInit {
     lazy val nodeGridImpl = new NodeGrid(fullInventoryRepository, nodeInfoServiceImpl, configService)
 
     lazy val modificationService      =
-      new ModificationService(eventLogRepository, gitModificationRepository, itemArchiveManagerImpl, uuidGen)
+      new ModificationService(eventLogRepository, gitModificationRepository, itemArchiveManagerImpl, stringUuidGenerator)
     lazy val eventListDisplayerImpl   = new EventListDisplayer(eventLogRepository)
     lazy val eventLogDetailsGenerator = new EventLogDetailsGenerator(
       eventLogDetailsServiceImpl,
@@ -2466,7 +2530,7 @@ object RudderConfigInit {
         rwLdap,
         ldapDiffMapper,
         eventLogRepository,
-        uuidGen,
+        stringUuidGenerator,
         gitDirectiveArchiver,
         gitActiveTechniqueArchiver,
         gitActiveTechniqueCategoryArchiver,
@@ -2532,7 +2596,7 @@ object RudderConfigInit {
       roLdapNodeGroupRepository,
       rwLdap,
       ldapDiffMapper,
-      uuidGen,
+      stringUuidGenerator,
       eventLogRepository,
       gitNodeGroupArchiver,
       personIdentService,
@@ -2553,7 +2617,7 @@ object RudderConfigInit {
       new WoLDAPRuleCategoryRepository(
         roLDAPRuleCategoryRepository,
         rwLdap,
-        uuidGen,
+        stringUuidGenerator,
         gitRuleCategoryArchiver,
         personIdentService,
         RUDDER_AUTOARCHIVEITEMS
@@ -2677,7 +2741,7 @@ object RudderConfigInit {
         roLdapDirectiveRepository,
         woLdapDirectiveRepository,
         techniqueRepository,
-        uuidGen
+        stringUuidGenerator
       )
     )
 
@@ -2685,7 +2749,7 @@ object RudderConfigInit {
       val service = new TechniqueRepositoryImpl(
         techniqueReader,
         Seq(),
-        uuidGen
+        stringUuidGenerator
       )
       service
     }
@@ -2928,7 +2992,7 @@ object RudderConfigInit {
       dynGroupServiceImpl,
       dynGroupUpdaterService,
       asyncDeploymentAgent,
-      uuidGen,
+      stringUuidGenerator,
       RUDDER_BATCH_DYNGROUP_UPDATEINTERVAL,
       () => configService.rudder_compute_dyngroups_max_parallelism().toBox
     )
@@ -2965,7 +3029,7 @@ object RudderConfigInit {
     lazy val techniqueLibraryUpdater = new CheckTechniqueLibrary(
       techniqueRepositoryImpl,
       asyncDeploymentAgent,
-      uuidGen,
+      stringUuidGenerator,
       RUDDER_BATCH_TECHNIQUELIBRARY_UPDATEINTERVAL
     )
 
@@ -3029,13 +3093,13 @@ object RudderConfigInit {
     lazy val healthcheckNotificationService = new HealthcheckNotificationService(healthcheckService, RUDDER_HEALTHCHECK_PERIOD)
     lazy val campaignSerializer             = new CampaignSerializer()
     lazy val campaignEventRepo              = new CampaignEventRepositoryImpl(doobie, campaignSerializer)
-    val campaignPath                        = root / "var" / "rudder" / "configuration-repository" / "campaigns"
+    lazy val campaignPath                   = root / "var" / "rudder" / "configuration-repository" / "campaigns"
 
     lazy val campaignRepo = CampaignRepositoryImpl
       .make(campaignSerializer, campaignPath, campaignEventRepo)
       .runOrDie(err => new RuntimeException(s"Error during initialization of campaign repository: " + err.fullMsg))
 
-    val mainCampaignService      = new MainCampaignService(campaignEventRepo, campaignRepo, uuidGen, 1, 1)
+    lazy val mainCampaignService = new MainCampaignService(campaignEventRepo, campaignRepo, stringUuidGenerator, 1, 1)
     lazy val jsonReportsAnalyzer = JSONReportsAnalyser(reportsRepository, propertyRepository)
 
     // todo: scheduler interval should be a property
@@ -3053,7 +3117,7 @@ object RudderConfigInit {
       new CheckConnections(dataSourceProvider, rwLdap),
       new CheckTechniqueLibraryReload(
         techniqueRepositoryImpl,
-        uuidGen
+        stringUuidGenerator
       ),
       new CheckAddSpecialTargetAllPolicyServers(rwLdap),
       new CheckAddSpecialNodeGroupsDescription(rwLdap),
@@ -3064,7 +3128,7 @@ object RudderConfigInit {
         rwLdap,
         techniqueRepository,
         techniqueRepositoryImpl,
-        uuidGen,
+        stringUuidGenerator,
         woDirectiveRepository,
         woRuleRepository
       ),
@@ -3076,28 +3140,28 @@ object RudderConfigInit {
         techniqueRepositoryImpl,
         roLdapDirectiveRepository,
         woLdapDirectiveRepository,
-        uuidGen,
+        stringUuidGenerator,
         asyncDeploymentAgent
       ), // new CheckDirectiveBusinessRules()
 
-      new CheckRudderGlobalParameter(roLDAPParameterRepository, woLDAPParameterRepository, uuidGen),
-      new CheckInitXmlExport(itemArchiveManagerImpl, personIdentService, uuidGen),
+      new CheckRudderGlobalParameter(roLDAPParameterRepository, woLDAPParameterRepository, stringUuidGenerator),
+      new CheckInitXmlExport(itemArchiveManagerImpl, personIdentService, stringUuidGenerator),
       new CheckNcfTechniqueUpdate(
         restExtractorService,
         ncfTechniqueWriter,
         roLDAPApiAccountRepository.systemAPIAccount,
-        uuidGen,
+        stringUuidGenerator,
         updateTechniqueLibrary,
         ncfTechniqueReader,
         resourceFileService
       ),
       new TriggerPolicyUpdate(
         asyncDeploymentAgent,
-        uuidGen
+        stringUuidGenerator
       ),
       new RemoveFaultyLdapEntries(
         woDirectiveRepository,
-        uuidGen
+        stringUuidGenerator
       ),
       new CreateSystemToken(roLDAPApiAccountRepository.systemAPIAccount),
       new LoadNodeComplianceCache(nodeInfoService, reportingServiceImpl)
@@ -3218,9 +3282,9 @@ object RudderConfigInit {
     }
     lazy val roAgentRunsRepository: RoReportsExecutionRepository = cachedAgentRunRepository
 
-    val updatesEntryJdbcRepository = new LastProcessedReportRepositoryImpl(doobie)
+    lazy val updatesEntryJdbcRepository = new LastProcessedReportRepositoryImpl(doobie)
 
-    val executionService = {
+    lazy val executionService = {
       val maxCatchupTime  = {
         val temp = FiniteDuration(RUDDER_REPORTS_EXECUTION_MAX_DAYS.toLong, "day") + FiniteDuration(
           RUDDER_REPORTS_EXECUTION_MAX_MINUTES.toLong,
@@ -3248,14 +3312,14 @@ object RudderConfigInit {
       )
     }
 
-    val aggregateReportScheduler = new FindNewReportsExecution(executionService, RUDDER_REPORTS_EXECUTION_INTERVAL)
+    lazy val aggregateReportScheduler = new FindNewReportsExecution(executionService, RUDDER_REPORTS_EXECUTION_INTERVAL)
 
     // This needs to be done at the end, to be sure that all is initialized
     deploymentService.setDynamicsGroupsService(updateDynamicGroups)
 
     // aggregate information about node count
     // don't forget to start-it once out of the zone which lead to dead-lock (ie: in Lift boot)
-    val historizeNodeCountBatch = for {
+    lazy val historizeNodeCountBatch = for {
       gitLogger <- CommitLogServiceImpl.make(METRICS_NODES_DIRECTORY_GIT_ROOT)
       writer    <- WriteNodeCSV.make(METRICS_NODES_DIRECTORY_GIT_ROOT, ";", "yyyy-MM")
       service    = new HistorizeNodeCountService(
@@ -3277,24 +3341,24 @@ object RudderConfigInit {
       _         <- cron.start
     } yield ()
 
-    val checkInventoryUpdate       = new CheckInventoryUpdate(
+    lazy val checkInventoryUpdate       = new CheckInventoryUpdate(
       nodeInfoServiceImpl,
       asyncDeploymentAgent,
-      uuidGen,
+      stringUuidGenerator,
       RUDDER_BATCH_CHECK_NODE_CACHE_INTERVAL
     )
-    val purgeDeletedInventories    = new PurgeDeletedInventories(
+    lazy val purgeDeletedInventories    = new PurgeDeletedInventories(
       removeNodeServiceImpl,
       FiniteDuration(RUDDER_BATCH_PURGE_DELETED_INVENTORIES_INTERVAL.toLong, "hours"),
       RUDDER_BATCH_PURGE_DELETED_INVENTORIES
     )
-    val purgeUnreferencedSoftwares = {
+    lazy val purgeUnreferencedSoftwares = {
       new PurgeUnreferencedSoftwares(
         softwareService,
         FiniteDuration(RUDDER_BATCH_DELETE_SOFTWARE_INTERVAL.toLong, "hours")
       )
     }
-    val asynComplianceService      = new AsyncComplianceService(reportingService)
+    lazy val asynComplianceService      = new AsyncComplianceService(reportingService)
 
     RudderServiceApi(
       roLdap,
@@ -3317,7 +3381,7 @@ object RudderConfigInit {
       reportingServiceImpl,
       asynComplianceService,
       debugScript,
-      uuidGen,
+      stringUuidGenerator,
       queryParser,
       inventoryHistoryLogRepository,
       inventoryLogEventServiceImpl,
@@ -3362,7 +3426,38 @@ object RudderConfigInit {
       woLDAPApiAccountRepository,
       cachedAgentRunRepository,
       pendingNodeCheckGroup,
-      allBootstrapChecks
+      allBootstrapChecks,
+      authenticationProviders,
+      rudderUserListProvider,
+      restApiAccounts,
+      restQuicksearch,
+      restCompletion,
+      sharedFileApi,
+      eventLogApi,
+      stringUuidGenerator,
+      inventoryWatcher,
+      configService,
+      historizeNodeCountBatch,
+      policyGenerationBootGuard,
+      healthcheckNotificationService,
+      jsonPluginDefinition,
+      rudderApi,
+      authorizationApiMapping,
+      roRuleCategoryRepository,
+      woRuleCategoryRepository,
+      workflowLevelService,
+      ncfTechniqueReader,
+      recentChangesService,
+      ruleCategoryService,
+      restExtractorService,
+      snippetExtensionRegister,
+      clearCacheService,
+      linkUtil,
+      userService,
+      ApiVersions,
+      apiDispatcher,
+      configurationRepository,
+      roParameterService
     )
   }
 }

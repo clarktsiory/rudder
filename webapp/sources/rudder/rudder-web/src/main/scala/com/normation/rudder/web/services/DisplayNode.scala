@@ -39,6 +39,7 @@ package com.normation.rudder.web
 package services
 
 import bootstrap.liftweb.RudderConfig
+
 import com.normation.box._
 import com.normation.cfclerk.domain.HashAlgoConstraint.SHA1
 import com.normation.eventlog.ModificationId
@@ -57,6 +58,9 @@ import com.normation.rudder.services.reports.Pending
 import com.normation.rudder.web.model.JsNodeId
 import com.normation.rudder.web.services.CurrentUser
 import com.normation.utils.DateFormaterService
+
+import bootstrap.liftweb.RudderParsedProperties
+
 import com.normation.zio._
 import net.liftweb.common._
 import net.liftweb.http._
@@ -69,6 +73,7 @@ import net.liftweb.http.js.JsCmds._
 import net.liftweb.util._
 import net.liftweb.util.Helpers._
 import org.joda.time.DateTime
+
 import scala.xml._
 import scala.xml.Utility.escape
 
@@ -998,7 +1003,7 @@ object DisplayNode extends Loggable {
 
   private[this] def removeNode(nodeId: NodeId): JsCmd = {
     val modId = ModificationId(uuidGen.newUuid)
-    removeNodeService.removeNodePure(nodeId, RudderConfig.RUDDER_DEFAULT_DELETE_NODE_MODE, modId, CurrentUser.actor).toBox match {
+    removeNodeService.removeNodePure(nodeId, RudderParsedProperties.RUDDER_DEFAULT_DELETE_NODE_MODE, modId, CurrentUser.actor).toBox match {
       case Full(_) =>
         asyncDeploymentAgent ! AutomaticStartDeployment(modId, CurrentUser.actor)
         onSuccess

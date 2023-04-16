@@ -38,6 +38,7 @@
 package com.normation.rudder.web.snippet.administration
 
 import bootstrap.liftweb.RudderConfig
+
 import com.normation.box._
 import com.normation.cfclerk.domain._
 import com.normation.eventlog.ModificationId
@@ -51,6 +52,8 @@ import com.normation.rudder.web.model.JsTreeNode
 import com.normation.rudder.web.services.AgentCompat
 import com.normation.rudder.web.services.CurrentUser
 import com.normation.rudder.web.services.ReasonBehavior._
+
+import bootstrap.liftweb.RudderParsedProperties
 import net.liftweb.common._
 import net.liftweb.common.Box.box2Option
 import net.liftweb.common.Box.option2Box
@@ -65,6 +68,7 @@ import net.liftweb.http.js.JsCmds._
 import net.liftweb.json._
 import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
+
 import scala.xml._
 
 /**
@@ -89,7 +93,7 @@ class TechniqueLibraryManagement extends DispatchSnippet with Loggable {
   // transform Technique variable to human viewable HTML fields
   private[this] val treeUtilService             = RudderConfig.jsTreeUtilService
   private[this] val userPropertyService         = RudderConfig.userPropertyService
-  private[this] val updateTecLibInterval        = RudderConfig.RUDDER_BATCH_TECHNIQUELIBRARY_UPDATEINTERVAL
+  private[this] val updateTecLibInterval        = RudderParsedProperties.RUDDER_BATCH_TECHNIQUELIBRARY_UPDATEINTERVAL
 
   // the popup component to create user technique category
   private[this] val creationPopup = new LocalSnippet[CreateActiveTechniqueCategoryPopup]
