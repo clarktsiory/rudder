@@ -140,7 +140,7 @@ object PluginsInfo {
 //////////
 object StaticResourceRewrite extends RestHelper {
   // prefix added to signal that the resource is cached
-  val prefix = s"cache-${RudderParsedProperties.rudderFullVersion}"
+  val prefix = s"cache-${RudderConfig.rudderFullVersion}"
   def headers(others: List[(String, String)]): List[(String, String)] = {
     ("Cache-Control", "max-age=31556926, public") ::
     ("Pragma", "") ::
@@ -340,15 +340,10 @@ class Boot extends Loggable {
     ////////// SECURITY SETTINGS //////////
 
     // Strict-Transport-Security (HSTS) header
-    val hsts = if (RudderParsedProperties.RUDDER_SERVER_HSTS) {
+    val hsts = if (RudderConfig.RUDDER_SERVER_HSTS) {
       // Include subdomains or not depending on setting
       // Set for 1 year (standard value for "forever")
-      Some(
-        HttpsRules(
-          includeSubDomains = RudderParsedProperties.RUDDER_SERVER_HSTS_SUBDOMAINS,
-          requiredTime = Some(Duration(365, DAYS))
-        )
-      )
+      Some(HttpsRules(includeSubDomains = RudderConfig.RUDDER_SERVER_HSTS_SUBDOMAINS, requiredTime = Some(Duration(365, DAYS))))
     } else {
       None
     }
@@ -452,7 +447,7 @@ class Boot extends Loggable {
     SessionMaster.sessionCheckFuncs = SessionMaster.sessionCheckFuncs ::: List(IdleSessionTimeout)
 
     // Set timeout value, which will be applied by both the standard and custom session cleaner
-    LiftRules.sessionInactivityTimeout.default.set(RudderParsedProperties.AUTH_IDLE_TIMEOUT.map(d => d.toMillis))
+    LiftRules.sessionInactivityTimeout.default.set(RudderConfig.AUTH_IDLE_TIMEOUT.map(d => d.toMillis))
 
     ////////// END OF SECURITY SETTINGS //////////
 
@@ -666,11 +661,11 @@ class Boot extends Loggable {
     // start inventory garbage collector
     RudderConfig.inventoryWatcher.startGarbageCollection
     // start inventory watchers if needed
-    if (RudderParsedProperties.WATCHER_ENABLE) {
+    if (RudderConfig.WATCHER_ENABLE) {
       RudderConfig.inventoryWatcher.startWatcher()
     } else { // don't start
       InventoryProcessingLogger.debug(
-        s"Not automatically starting incoming inventory watcher because 'inventories.watcher.enable'=${RudderParsedProperties.WATCHER_ENABLE}"
+        s"Not automatically starting incoming inventory watcher because 'inventories.watcher.enable'=${RudderConfig.WATCHER_ENABLE}"
       )
     }
 

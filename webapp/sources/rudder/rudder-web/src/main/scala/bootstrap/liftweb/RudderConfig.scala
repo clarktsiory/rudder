@@ -980,6 +980,18 @@ object RudderConfig extends Loggable {
 
   ApplicationLogger.info(s"Starting Rudder ${rudderFullVersion} web application [build timestamp: ${builtTimestamp}]")
 
+  // for compat
+  def rudderFullVersion = RudderParsedProperties.rudderFullVersion
+  def RUDDER_SERVER_HSTS = RudderParsedProperties.RUDDER_SERVER_HSTS
+  def RUDDER_SERVER_HSTS_SUBDOMAINS = RudderParsedProperties.RUDDER_SERVER_HSTS_SUBDOMAINS
+  def AUTH_IDLE_TIMEOUT = RudderParsedProperties.AUTH_IDLE_TIMEOUT
+  def WATCHER_ENABLE = RudderParsedProperties.WATCHER_ENABLE
+  def RUDDER_DEFAULT_DELETE_NODE_MODE = RudderParsedProperties.RUDDER_DEFAULT_DELETE_NODE_MODE
+  def RUDDER_BATCH_DYNGROUP_UPDATEINTERVAL = RudderParsedProperties.RUDDER_BATCH_DYNGROUP_UPDATEINTERVAL
+  def RUDDER_GIT_ROOT_CONFIG_REPO = RudderParsedProperties.RUDDER_GIT_ROOT_CONFIG_REPO
+  def RUDDER_BCRYPT_COST = RudderParsedProperties.RUDDER_BCRYPT_COST
+  def RUDDER_BATCH_TECHNIQUELIBRARY_UPDATEINTERVAL = RudderParsedProperties.RUDDER_BATCH_TECHNIQUELIBRARY_UPDATEINTERVAL
+
   //
   // Theses services can be called from the outer world
   // They must be typed with there abstract interface, as

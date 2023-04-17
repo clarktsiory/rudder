@@ -38,7 +38,6 @@
 package com.normation.rudder.web.snippet.administration
 
 import bootstrap.liftweb.RudderConfig
-import bootstrap.liftweb.RudderParsedProperties
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.js._
@@ -50,7 +49,7 @@ import scala.xml.NodeSeq
 class DyngroupReloading extends DispatchSnippet with Loggable {
 
   private[this] val updateDynamicGroups         = RudderConfig.updateDynamicGroups
-  private[this] val updateDynamicGroupsInterval = RudderParsedProperties.RUDDER_BATCH_DYNGROUP_UPDATEINTERVAL
+  private[this] val updateDynamicGroupsInterval = RudderConfig.RUDDER_BATCH_DYNGROUP_UPDATEINTERVAL
 
   def dispatch = { case "render" => reload }
 

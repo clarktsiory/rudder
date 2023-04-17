@@ -124,7 +124,7 @@ object PasswordEncoder {
 
       // The version of bcrypt used is "2b". See https://en.wikipedia.org/wiki/Bcrypt#Versioning_history
       // It prevents the length (unsigned char) of a long password to overflow and wrap at 256. (Cf https://marc.info/?l=openbsd-misc&m=139320023202696)
-      OpenBSDBCrypt.generate("2b", rawPassword.toString.toCharArray, salt, RudderParsedProperties.RUDDER_BCRYPT_COST)
+      OpenBSDBCrypt.generate("2b", rawPassword.toString.toCharArray, salt, RudderConfig.RUDDER_BCRYPT_COST)
     }
     override def matches(rawPassword: CharSequence, encodedPassword: String): Boolean = {
       try {

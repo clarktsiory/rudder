@@ -38,7 +38,6 @@
 package com.normation.rudder.web.snippet.administration
 
 import bootstrap.liftweb.RudderConfig
-import bootstrap.liftweb.RudderParsedProperties
 import com.normation.appconfig._
 import com.normation.box._
 import com.normation.eventlog.ModificationId
@@ -177,7 +176,7 @@ class PropertiesManagement extends DispatchSnippet with Loggable {
     }
 
     // Rendering
-    ("#configurationRepoPath" #> RudderParsedProperties.RUDDER_GIT_ROOT_CONFIG_REPO &
+    ("#configurationRepoPath" #> RudderConfig.RUDDER_GIT_ROOT_CONFIG_REPO &
     "#enabled" #> {
       initEnabled match {
         case Full(value) =>
