@@ -115,14 +115,7 @@ import com.normation.rudder.domain._
 import com.normation.rudder.domain.logger.ApplicationLogger
 import com.normation.rudder.domain.logger.NodeConfigurationLoggerImpl
 import com.normation.rudder.domain.logger.ScheduledJobLoggerPure
-import com.normation.rudder.domain.nodes.NodeGroupId
-import com.normation.rudder.domain.policies.DirectiveId
-import com.normation.rudder.domain.policies.RuleId
 import com.normation.rudder.domain.queries._
-import com.normation.rudder.domain.workflows.DirectiveChanges
-import com.normation.rudder.domain.workflows.GlobalParameterChanges
-import com.normation.rudder.domain.workflows.NodeGroupChanges
-import com.normation.rudder.domain.workflows.RuleChanges
 import com.normation.rudder.facts.nodes.GitNodeFactRepository
 import com.normation.rudder.git.GitRepositoryProviderImpl
 import com.normation.rudder.git.GitRevisionProvider
@@ -210,7 +203,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.joda.time.DateTimeZone
 import scala.collection.mutable.Buffer
 import scala.concurrent.duration.FiniteDuration
-import scala.xml.Node
 import zio.{Scheduler => _, System => _, _}
 import zio.syntax._
 
@@ -1114,6 +1106,9 @@ object RudderConfig extends Loggable {
   val woRuleRepository:                    WoRuleRepository                           = rci.woRuleRepository
   val workflowEventLogService:             WorkflowEventLogService                    = rci.workflowEventLogService
   val workflowLevelService:                WorkflowLevelService                       = rci.workflowLevelService
+  val aggregateReportScheduler:            FindNewReportsExecution                    = rci.aggregateReportScheduler
+  val secretEventLogService:               SecretEventLogService                      = rci.secretEventLogService
+  val changeRequestChangesSerialisation:   ChangeRequestChangesSerialisation          = rci.changeRequestChangesSerialisation
 
   /**
    * A method to call to force initialisation of all object and services.
@@ -1128,11 +1123,12 @@ object RudderConfig extends Loggable {
 
     IOResult.attempt {
 
-      RudderParsedProperties.logRudderParsedProperties
+      RudderParsedProperties.logRudderParsedProperties()
       ////////// bootstraps checks //////////
       // they must be out of Lift boot() because that method
       // is encapsulated in a try/catch ( see net.liftweb.http.provider.HTTPProvider.bootLift )
       rci.allBootstrapChecks.checks()
+
     }
   }
 
@@ -1260,7 +1256,10 @@ case class RudderServiceApi(
     campaignEventRepo:                   CampaignEventRepositoryImpl,
     mainCampaignService:                 MainCampaignService,
     campaignSerializer:                  CampaignSerializer,
-    jsonReportsAnalyzer:                 JSONReportsAnalyser
+    jsonReportsAnalyzer:                 JSONReportsAnalyser,
+    aggregateReportScheduler:            FindNewReportsExecution,
+    secretEventLogService:               SecretEventLogService,
+    changeRequestChangesSerialisation:   ChangeRequestChangesSerialisation
 )
 
 /*
@@ -1290,8 +1289,6 @@ object RudderConfigInit {
       .foreach(err => throw new InitError("An error occurred when testing for LDAP connection, please check it: " + err.fullMsg))
 
     lazy val writeAllAgentSpecificFiles = new WriteAllAgentSpecificFiles(agentRegister)
-
-    lazy val ldapInventoryMapper = inventoryMapper
 
     lazy val pluginSettingsService = new FilePluginSettingsService(
       root / "opt" / "rudder" / "etc" / "rudder-pkg" / "rudder-pkg.conf"
@@ -1394,7 +1391,6 @@ object RudderConfigInit {
     }
 
     lazy val roParameterService: RoParameterService = roParameterServiceImpl
-    lazy val woParameterService: WoParameterService = woParameterServiceImpl
 
     //////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////// REST ///////////////////////////////////////////
@@ -1804,7 +1800,6 @@ object RudderConfigInit {
       .make(RUDDER_GIT_ROOT_FACT_REPO)
       .runOrDie(err => new RuntimeException(s"Error when initializing git configuration repository: " + err.fullMsg))
     lazy val gitFactRepoGC = new GitGC(gitFactRepo, RUDDER_GIT_GC)
-    gitFactRepoGC.start()
     lazy val factRepo      = new GitNodeFactRepository(gitFactRepo, RUDDER_GROUP_OWNER_CONFIG_REPO)
     factRepo.checkInit().runOrDie(err => new RuntimeException(s"Error when checking fact repository init: " + err.fullMsg))
 
@@ -1902,7 +1897,6 @@ object RudderConfigInit {
         List(better.files.File(INVENTORY_DIR_FAILED), better.files.File(INVENTORY_DIR_RECEIVED))
       )
     }
-    cleanOldInventoryBatch.start()
 
     lazy val archiveApi = {
       val archiveBuilderService =
@@ -2304,7 +2298,6 @@ object RudderConfigInit {
       .make(RUDDER_GIT_ROOT_CONFIG_REPO)
       .runOrDie(err => new RuntimeException(s"Error when creating git configuration repository: " + err.fullMsg))
     lazy val gitConfigRepoGC              = new GitGC(gitConfigRepo, RUDDER_GIT_GC)
-    gitConfigRepoGC.start()
     lazy val gitRevisionProviderImpl      = {
       new LDAPGitRevisionProvider(rwLdap, rudderDit, gitConfigRepo, RUDDER_TECHNIQUELIBRARY_GIT_REFS_PATH)
     }
@@ -2486,8 +2479,6 @@ object RudderConfigInit {
     lazy val personIdentService: PersonIdentService = new TrivialPersonIdentService
 
     lazy val roParameterServiceImpl = new RoParameterServiceImpl(roLDAPParameterRepository)
-    lazy val woParameterServiceImpl =
-      new WoParameterServiceImpl(roParameterServiceImpl, woLDAPParameterRepository, asyncDeploymentAgent)
 
     ///// items archivers - services that allows to transform items to XML and save then on a Git FS /////
     lazy val gitModificationRepository = new GitModificationRepositoryImpl(doobie)
@@ -2690,7 +2681,6 @@ object RudderConfigInit {
       personIdentService,
       RUDDER_AUTOARCHIVEITEMS
     )
-    lazy val woParameterRepository: WoParameterRepository = woLDAPParameterRepository
 
     lazy val itemArchiveManagerImpl = new ItemArchiveManagerImpl(
       roLdapRuleRepository,
@@ -3409,7 +3399,8 @@ object RudderConfigInit {
     }
     lazy val asynComplianceService      = new AsyncComplianceService(reportingService)
 
-    RudderServiceApi(
+    // reference services part of the API
+    val rci = RudderServiceApi(
       roLdap,
       pendingNodesDit,
       acceptedNodesDit,
@@ -3527,7 +3518,28 @@ object RudderConfigInit {
       campaignEventRepo,
       mainCampaignService,
       campaignSerializer,
-      jsonReportsAnalyzer
+      jsonReportsAnalyzer,
+      aggregateReportScheduler,
+      secretEventLogService,
+      changeRequestChangesSerialisation
     )
+
+    // we need to reference batches not part of the API to start them since
+    // they are lazy val
+    cleanOldInventoryBatch.start()
+    gitFactRepoGC.start()
+    gitConfigRepoGC.start()
+    // UpdateDynamicGroups is part of rci
+    // reportingServiceImpl part of rci
+    // checkInventoryUpdate part of rci
+    // purgeDeletedInventories paat of rci
+    // purgeUnreferencedSoftwares part of rci
+    // AutomaticReportLogger part of rci
+    // AutomaticReportsCleaning part of rci
+    // CheckTechniqueLibrary part of rci
+    // AutomaticReportsCleaning part of rci
+
+    // return services part of the API
+    rci
   }
 }

@@ -38,7 +38,7 @@
 package com.normation.rudder.web.snippet.administration
 
 import bootstrap.liftweb.RudderConfig
-
+import bootstrap.liftweb.RudderParsedProperties
 import com.normation.box._
 import com.normation.cfclerk.domain._
 import com.normation.eventlog.ModificationId
@@ -52,8 +52,6 @@ import com.normation.rudder.web.model.JsTreeNode
 import com.normation.rudder.web.services.AgentCompat
 import com.normation.rudder.web.services.CurrentUser
 import com.normation.rudder.web.services.ReasonBehavior._
-
-import bootstrap.liftweb.RudderParsedProperties
 import net.liftweb.common._
 import net.liftweb.common.Box.box2Option
 import net.liftweb.common.Box.option2Box
@@ -68,7 +66,6 @@ import net.liftweb.http.js.JsCmds._
 import net.liftweb.json._
 import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
-
 import scala.xml._
 
 /**

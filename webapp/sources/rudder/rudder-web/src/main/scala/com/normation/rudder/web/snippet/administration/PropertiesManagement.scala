@@ -38,8 +38,8 @@
 package com.normation.rudder.web.snippet.administration
 
 import bootstrap.liftweb.RudderConfig
+import bootstrap.liftweb.RudderParsedProperties
 import com.normation.appconfig._
-
 import com.normation.box._
 import com.normation.eventlog.ModificationId
 import com.normation.rudder.AuthorizationType
@@ -55,9 +55,6 @@ import com.normation.rudder.web.components.AgentPolicyModeEditForm
 import com.normation.rudder.web.components.AgentScheduleEditForm
 import com.normation.rudder.web.components.ComplianceModeEditForm
 import com.normation.rudder.web.services.CurrentUser
-
-import bootstrap.liftweb.RudderParsedProperties
-
 import java.nio.charset.StandardCharsets
 import net.liftweb.common._
 import net.liftweb.http._
@@ -67,7 +64,6 @@ import net.liftweb.http.js.JE._
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.util._
 import net.liftweb.util.Helpers._
-
 import scala.xml.NodeSeq
 import scala.xml.Text
 

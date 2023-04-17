@@ -408,9 +408,7 @@ object zio {
         Unsafe.unsafe(implicit unsafe => Runtime.default.unsafe.run(Fiber.dumpAll).getOrThrowFiberFailure())
       }
 
-      Unsafe.unsafe { implicit unsafe =>
-        Platform.addSignalHandler("USR2", dumpFibers)
-      }
+      Unsafe.unsafe(implicit unsafe => Platform.addSignalHandler("USR2", dumpFibers))
     }
 
     /*
@@ -421,8 +419,7 @@ object zio {
      */
     val internal = Runtime.default
 
-    def installSignalHandlers(): Unit = {
-    }
+    def installSignalHandlers(): Unit = {}
 
     def layers:      ZLayer[Any, Nothing, Any] = ZLayer.fromZIOEnvironment(internal.environment.succeed)
     def environment: ZEnvironment[Any]         = internal.environment

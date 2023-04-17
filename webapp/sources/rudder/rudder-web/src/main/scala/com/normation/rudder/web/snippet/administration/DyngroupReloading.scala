@@ -45,7 +45,6 @@ import net.liftweb.http.js._
 import net.liftweb.http.js.JE.JsRaw
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.util.Helpers._
-
 import scala.xml.NodeSeq
 
 class DyngroupReloading extends DispatchSnippet with Loggable {
