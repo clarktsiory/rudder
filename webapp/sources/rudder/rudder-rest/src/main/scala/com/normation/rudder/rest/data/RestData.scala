@@ -236,6 +236,7 @@ final case class RestParameter(
   }
 }
 
+
 final case class RestRule(
     name:             Option[String] = None,
     category:         Option[RuleCategoryId] = None,
