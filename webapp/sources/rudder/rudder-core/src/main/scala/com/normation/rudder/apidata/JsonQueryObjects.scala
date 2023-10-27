@@ -97,8 +97,8 @@ object JsonQueryObjects {
   final case class JQRuleCategory(
       name:        Option[String] = None,
       description: Option[String] = None,
-      parent:      Option[String] = None,
-      id:          Option[String] = None
+      parent:      Option[RuleCategoryId] = None,
+      id:          Option[RuleCategoryId] = None
   ) {
 
     def update(ruleCategory: RuleCategory) = {
@@ -547,14 +547,17 @@ class ZioJsonExtractor(queryParser: CmdbQueryParser with JsonQueryLexer) {
   }
 
   def extractRuleCategoryFromParam(params: Map[String, List[String]]): PureResult[JQRuleCategory] = {
-    Right(
+    for {
+      parent <- params.parse("parent", JsonDecoder[RuleCategoryId])
+      id     <- params.parse("id", JsonDecoder[RuleCategoryId])
+    } yield {
       JQRuleCategory(
         params.optGet("name"),
         params.optGet("description"),
-        params.optGet("parent"),
-        params.optGet("id")
+        parent,
+        id
       )
-    )
+    }
   }
 
   def extractDirectiveFromParams(params: Map[String, List[String]]): PureResult[JQDirective] = {

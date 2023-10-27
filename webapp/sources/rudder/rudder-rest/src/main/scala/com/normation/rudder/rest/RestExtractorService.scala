@@ -583,18 +583,6 @@ final case class RestExtractorService(
     }
   }
 
-  def extractRuleCategory(params: Map[String, List[String]]): Box[RestRuleCategory] = {
-
-    for {
-      name        <- extractOneValue(params, "name")(toMinimalSizeString(3))
-      description <- extractOneValue(params, "description")()
-      parent      <- extractOneValue(params, "parent")(toRuleCategoryId)
-      id          <- extractOneValue(params, "id")(toRuleCategoryId)
-    } yield {
-      RestRuleCategory(name, description, parent, id)
-    }
-  }
-
   def extractGroup(params: Map[String, List[String]]): Box[RestGroup] = {
     for {
       id          <- extractOneValue(params, "id")()
@@ -871,17 +859,6 @@ final case class RestExtractorService(
       tags             <- extractTagsFromJson(json \ "tags") ?~! "Error when extracting Rule tags"
     } yield {
       RestRule(name, category, shortDescription, longDescription, directives, target.map(Set(_)), enabled, tags)
-    }
-  }
-
-  def extractRuleCategory(json: JValue): Box[RestRuleCategory] = {
-    for {
-      name        <- extractJsonString(json, "name", toMinimalSizeString(3))
-      description <- extractJsonString(json, "description")
-      parent      <- extractJsonString(json, "parent", toRuleCategoryId)
-      id          <- extractJsonString(json, "id", toRuleCategoryId)
-    } yield {
-      RestRuleCategory(name, description, parent, id)
     }
   }
 

@@ -65,23 +65,6 @@ import com.normation.rudder.rule.category._
 import com.typesafe.config.ConfigValue
 import net.liftweb.common._
 
-final case class RestRuleCategory(
-    name:        Option[String] = None,
-    description: Option[String] = None,
-    parent:      Option[RuleCategoryId] = None,
-    id:          Option[RuleCategoryId] = None
-) {
-
-  def update(ruleCategory: RuleCategory) = {
-    val updateName        = name.getOrElse(ruleCategory.name)
-    val updateDescription = description.getOrElse(ruleCategory.description)
-    ruleCategory.copy(
-      name = updateName,
-      description = updateDescription
-    )
-  }
-}
-
 final case class RestGroupCategory(
     id:          Option[NodeGroupCategoryId] = None,
     name:        Option[String] = None,

@@ -292,7 +292,7 @@ class RuleApi(
     }
   }
 
-  object UpdateRuleCategory extends LiftApiModuleString with WithLiftJsonExtractor {
+  object UpdateRuleCategory extends LiftApiModuleString {
     val schema = API.UpdateRuleCategory
     def process(
         version:    ApiVersion,
@@ -303,23 +303,13 @@ class RuleApi(
         authzToken: AuthzToken
     ): LiftResponse = {
       val action = {
-        if (req.json_?) {
-          for {
-            json <- req.json ?~! "No JSON data sent"
-            cat  <- restExtractor.extractRuleCategory(json)
-          } yield {
-            serviceV6.updateCategory(RuleCategoryId(id), cat) _
-          }
-        } else {
-          for {
-            restCategory <- restExtractor.extractRuleCategory(req.params)
-          } yield {
-            serviceV6.updateCategory(RuleCategoryId(id), restCategory) _
-          }
-        }
+        zioJsonExtractor
+          .extractRuleCategory(req)
+          .map(cat => serviceV6.updateCategory(RuleCategoryId(id), cat) _)
       }
+
       actionResponse(
-        action,
+        action.toBox,
         req,
         s"Could not update Rule category '${id}'",
         Some(id),
@@ -329,22 +319,15 @@ class RuleApi(
     }
   }
 
-  object CreateRuleCategory extends LiftApiModule0 with WithLiftJsonExtractor {
+  object CreateRuleCategory extends LiftApiModule0 {
     val schema = API.CreateRuleCategory
     def process0(version: ApiVersion, path: ApiPath, req: Req, params: DefaultParams, authzToken: AuthzToken): LiftResponse = {
-      val restData = if (req.json_?) {
-        for {
-          json <- req.json
-          cat  <- restExtractor.extractRuleCategory(json)
-        } yield {
-          cat
-        }
-      } else { restExtractor.extractRuleCategory(req.params) }
-      val id       = restData.map(_.id).toOption.flatten.getOrElse(RuleCategoryId(uuidGen.newUuid))
+      val restData = zioJsonExtractor.extractRuleCategory(req)
+      lazy val id  = restData.map(_.id).toOption.flatten.getOrElse(RuleCategoryId(uuidGen.newUuid))
       val action   = restData.map(cat => serviceV6.createCategory(cat, () => id) _)
 
       actionResponse(
-        action,
+        action.toBox,
         req,
         s"Could not create Rule category",
         Some(id.value), // I'm not sure it's relevant to give that on creation
@@ -464,7 +447,7 @@ class RuleApi(
     def process0(version: ApiVersion, path: ApiPath, req: Req, params: DefaultParams, authzToken: AuthzToken): LiftResponse = {
       (for {
         cat <- zioJsonExtractor.extractRuleCategory(req).toIO
-        res <- serviceV14.createCategory(cat, () => uuidGen.newUuid, params, authzToken.actor)
+        res <- serviceV14.createCategory(cat, () => RuleCategoryId(uuidGen.newUuid), params, authzToken.actor)
       } yield {
         res
       }).toLiftResponseOne(params, schema, s => Some(s.ruleCategories.id))
@@ -788,7 +771,7 @@ class RuleApiService6(
 
   def updateCategory(
       id:       RuleCategoryId,
-      restData: RestRuleCategory
+      restData: JQRuleCategory
   )(actor:      EventActor, modId: ModificationId, reason: Option[String]) = {
     logger.info(restData)
     for {
@@ -812,7 +795,7 @@ class RuleApiService6(
   }.toBox
 
   def createCategory(
-      restData:  RestRuleCategory,
+      restData:  JQRuleCategory,
       defaultId: () => RuleCategoryId
   )(actor:       EventActor, modId: ModificationId, reason: Option[String]) = {
     for {
@@ -1237,7 +1220,7 @@ class RuleApiService14(
       modId                = ModificationId(uuidGen.newUuid)
       _                   <- restData.parent match {
                                case Some(parent) =>
-                                 writeRuleCategory.updateAndMove(update, RuleCategoryId(parent), modId, actor, params.reason)
+                                 writeRuleCategory.updateAndMove(update, parent, modId, actor, params.reason)
                                case None         =>
                                  writeRuleCategory.updateAndMove(update, parentId, modId, actor, params.reason)
                              }
@@ -1249,16 +1232,16 @@ class RuleApiService14(
 
   def createCategory(
       restData:  JQRuleCategory,
-      defaultId: () => String,
+      defaultId: () => RuleCategoryId,
       params:    DefaultParams,
       actor:     EventActor
   ): IOResult[JRCategoriesRootEntrySimple] = {
     for {
       name     <- restData.name.checkMandatory(_.size > 3, v => "'displayName' is mandatory and must be at least 3 char long")
-      update    = RuleCategory(RuleCategoryId(restData.id.getOrElse(defaultId())), name, restData.description.getOrElse(""), Nil)
-      parent    = restData.parent.getOrElse("rootRuleCategory")
+      update    = RuleCategory(restData.id.getOrElse(defaultId()), name, restData.description.getOrElse(""), Nil)
+      parent    = restData.parent.getOrElse(RuleCategoryId("rootRuleCategory"))
       modId     = ModificationId(uuidGen.newUuid)
-      _        <- writeRuleCategory.create(update, RuleCategoryId(parent), modId, actor, params.reason)
+      _        <- writeRuleCategory.create(update, parent, modId, actor, params.reason)
       category <- getCategoryDetails(update.id)
     } yield {
       category
