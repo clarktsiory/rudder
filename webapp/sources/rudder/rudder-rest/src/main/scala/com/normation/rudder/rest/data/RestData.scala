@@ -220,6 +220,7 @@ case object AcceptNode extends NodeStatusAction
 case object RefuseNode extends NodeStatusAction
 case object DeleteNode extends NodeStatusAction
 
+
 final case class RestParameter(
     value:       Option[ConfigValue] = None,
     description: Option[String] = None,
