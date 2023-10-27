@@ -115,6 +115,7 @@ final case class RestDirective(
     tags:             Option[Tags]
 ) {
 
+
   val onlyName = name.isDefined &&
     shortDescription.isEmpty &&
     longDescription.isEmpty &&
