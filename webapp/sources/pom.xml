@@ -179,6 +179,7 @@ limitations under the License.
                  For -byname-implicit, it's because of Doobie, see: https://gitter.im/tpolecat/doobie?at=5f59e618765d633c54e74d52
             -->
             <arg>-Xlint:_,-nonlocal-return,-nullary-unit,-missing-interpolator,-byname-implicit</arg>
+            <arg>-Ymacro-annotations</arg>           <!-- Enable macro annotations, formerly in macro paradise. -->
             <arg>-Ywarn-dead-code</arg>              <!-- Warn when dead code is identified. -->
 
             <arg>-Ywarn-extra-implicit</arg>         <!-- Warn when more than one implicit parameter section is defined. -->
@@ -865,6 +866,11 @@ limitations under the License.
     <dependency>
       <groupId>dev.zio</groupId>
       <artifactId>zio-json-yaml_${scala-binary-version}</artifactId>
+      <version>${zio-json-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.zio</groupId>
+      <artifactId>zio-json-macros_${scala-binary-version}</artifactId>
       <version>${zio-json-version}</version>
     </dependency>
     <!-- explicit snakeyaml dependency to override default zio-json-version -->
