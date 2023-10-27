@@ -72,6 +72,7 @@ final case class RestGroupCategory(
     parent:      Option[NodeGroupCategoryId] = None
 ) {
 
+
   def update(category: FullNodeGroupCategory) = {
     val updateId          = id.getOrElse(category.id)
     val updateName        = name.getOrElse(category.name)
