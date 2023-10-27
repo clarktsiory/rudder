@@ -80,6 +80,7 @@ import com.normation.rudder.ncf.ParameterType.ParameterTypeService
 import com.normation.rudder.repository._
 import com.normation.rudder.repository.json.DataExtractor.CompleteJson
 import com.normation.rudder.repository.ldap.NodeStateEncoder
+import com.normation.rudder.rest.RestValidation
 import com.normation.rudder.rest.data._
 import com.normation.rudder.rule.category.RuleCategoryId
 import com.normation.rudder.services.policies.PropertyParser
@@ -198,10 +199,9 @@ final case class RestExtractorService(
   }
 
   private[this] def toMinimalSizeString(minimalSize: Int)(value: String): Box[String] = {
-    if (value.size >= minimalSize) {
-      Full(value)
-    } else {
-      Failure(s"$value must be at least have a ${minimalSize} character size")
+    RestValidation.toMinimalSizeString(minimalSize)(value) match {
+      case Right(value) => Full(value)
+      case Left(error)  => Failure(error)
     }
   }
 
