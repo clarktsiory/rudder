@@ -174,6 +174,7 @@ final case class RestGroup(
     category:    Option[NodeGroupCategoryId] = None
 ) {
 
+
   val onlyName = name.isDefined &&
     description.isEmpty &&
     query.isEmpty &&
