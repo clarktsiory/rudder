@@ -512,16 +512,6 @@ final case class RestExtractorService(
     }
   }
 
-  def extractChangeRequestInfo(params: Map[String, List[String]]): Box[APIChangeRequestInfo] = {
-    def ident = (value: String) => Full(value)
-    for {
-      name        <- extractOneValue(params, "name")(ident)
-      description <- extractOneValue(params, "description")(ident)
-    } yield {
-      APIChangeRequestInfo(name, description)
-    }
-  }
-
   def extractNodeIds(params: Map[String, List[String]]): Box[Option[List[NodeId]]] = {
     extractList(params, "nodeId")(convertListToNodeId)
   }

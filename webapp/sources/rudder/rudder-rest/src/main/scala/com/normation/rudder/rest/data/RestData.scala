@@ -60,23 +60,10 @@ import com.normation.rudder.domain.properties.InheritMode
 import com.normation.rudder.domain.properties.NodeProperty
 import com.normation.rudder.domain.properties.PropertyProvider
 import com.normation.rudder.domain.queries.Query
-import com.normation.rudder.domain.workflows.ChangeRequestInfo
 import com.normation.rudder.repository.FullNodeGroupCategory
 import com.normation.rudder.rule.category._
 import com.typesafe.config.ConfigValue
 import net.liftweb.common._
-
-final case class APIChangeRequestInfo(
-    name:        Option[String],
-    description: Option[String]
-) {
-  def updateCrInfo(crInfo: ChangeRequestInfo): ChangeRequestInfo = {
-    crInfo.copy(
-      name = name.getOrElse(crInfo.name),
-      description = description.getOrElse(crInfo.description)
-    )
-  }
-}
 
 final case class RestRuleCategory(
     name:        Option[String] = None,
