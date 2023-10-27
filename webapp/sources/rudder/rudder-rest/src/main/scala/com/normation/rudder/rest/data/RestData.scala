@@ -206,6 +206,7 @@ final case class RestNodeProperties(
     properties: Option[Seq[NodeProperty]]
 )
 
+
 final case class RestNode(
     properties:     Option[List[NodeProperty]],
     policyMode:     Option[Option[PolicyMode]],
