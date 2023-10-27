@@ -201,6 +201,7 @@ final case class RestGroup(
   }
 }
 
+
 final case class RestNodeProperties(
     properties: Option[Seq[NodeProperty]]
 )
