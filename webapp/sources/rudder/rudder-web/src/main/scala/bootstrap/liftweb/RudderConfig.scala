@@ -1671,6 +1671,7 @@ object RudderConfigInit {
       new GroupApiService6(
         roNodeGroupRepository,
         woNodeGroupRepository,
+        uuidGen,
         restDataSerializer
       )
     }

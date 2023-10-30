@@ -833,7 +833,7 @@ class RestTestSetUp {
     mockNodes.queryProcessor,
     restDataSerializer
   )
-  val groupService6               = new GroupApiService6(mockNodeGroups.groupsRepo, mockNodeGroups.groupsRepo, restDataSerializer)
+  val groupService6               = new GroupApiService6(mockNodeGroups.groupsRepo, mockNodeGroups.groupsRepo, uuidGen, restDataSerializer)
   val groupService14              = new GroupApiService14(
     mockNodeGroups.groupsRepo,
     mockNodeGroups.groupsRepo,

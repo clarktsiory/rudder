@@ -363,34 +363,16 @@ class GroupsApi(
       )
     }
   }
-  object CreateCategory extends LiftApiModule0 with WithLiftJsonExtractor      {
+  object CreateCategory extends LiftApiModule0                                 {
     val schema = API.CreateGroupCategory
     def process0(version: ApiVersion, path: ApiPath, req: Req, params: DefaultParams, authzToken: AuthzToken): LiftResponse = {
-      implicit val action = schema.name
-      val id              = () => NodeGroupCategoryId(uuidGen.newUuid)
-      val x               = for {
-        restCategory <- {
-          if (req.json_?) {
-            for {
-              json <- req.json ?~! "No JSON data sent"
-              cat  <- restExtractor.extractGroupCategory(json)
-            } yield {
-              cat
-            }
-          } else {
-            restExtractor.extractGroupCategory(req.params)
-          }
-        }
-      } yield {
-        serviceV6.createCategory(id, restCategory, version) _
-      }
-      actionResponse(
-        x,
-        req,
-        s"Could not create group category",
-        None,
-        authzToken.actor
-      )
+      val id       = () => NodeGroupCategoryId(uuidGen.newUuid)
+      val restData =
+        zioJsonExtractor.extractGroupCategory(req).chainError(s"Could not extract group category parameters from request").toIO
+
+      restData
+        .flatMap(serviceV6.createCategory(id, _, version, authzToken.actor, params))
+        .toLiftResponseOne(params, schema, _ => None)
     }
   }
 
@@ -968,6 +950,7 @@ class GroupApiService2(
 class GroupApiService6(
     readGroup:          RoNodeGroupRepository,
     writeGroup:         WoNodeGroupRepository,
+    uuidGen:            StringUuidGenerator,
     restDataSerializer: RestDataSerializer
 ) extends Loggable {
 
@@ -1023,16 +1006,19 @@ class GroupApiService6(
   // defaultId: the id to use if restDateDidn't provide one
   def createCategory(
       defaultId:  () => NodeGroupCategoryId,
-      restData:   RestGroupCategory,
-      apiVersion: ApiVersion
-  )(actor:        EventActor, modId: ModificationId, reason: Option[String]) = {
+      restData:   JQGroupCategory,
+      apiVersion: ApiVersion,
+      actor:      EventActor,
+      params:     DefaultParams
+  ): IOResult[JRGroupCategory] = {
     for {
-      update  <- restData.create(defaultId)
+      update  <- restData.create(defaultId).toIO
       category = update.toNodeGroupCategory
       parent   = restData.parent.getOrElse(NodeGroupCategoryId("GroupRoot"))
-      _       <- writeGroup.addGroupCategorytoCategory(category, parent, modId, actor, reason).toBox
+      modId    = ModificationId(uuidGen.newUuid)
+      _       <- writeGroup.addGroupCategorytoCategory(category, parent, modId, actor, params.reason)
     } yield {
-      restDataSerializer.serializeGroupCategory(update, parent, MinimalDetails, apiVersion)
+      JRGroupCategory.fromFull(update, parent, MinimalDetails)
     }
   }
 

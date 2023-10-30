@@ -67,6 +67,7 @@ import com.normation.rudder.ncf.ResourceFile
 import com.normation.rudder.ncf.TechniqueParameter
 import com.normation.rudder.repository.FullActiveTechnique
 import com.normation.rudder.repository.FullActiveTechniqueCategory
+import com.normation.rudder.repository.FullNodeGroupCategory
 import com.normation.rudder.rule.category.RuleCategory
 import com.normation.rudder.rule.category.RuleCategoryId
 import com.normation.rudder.services.queries.CmdbQueryParser
@@ -746,6 +747,98 @@ object JsonResponseObjects {
     }
   }
 
+  @jsonDiscriminator("kind") sealed trait JRGroupCategory {
+    def id:          String
+    def name:        String
+    def description: String
+    def parent:      String
+    def targets:     List[JRGroupCategory.Target]
+  }
+
+  object JRGroupCategory {
+
+    case class FullGroupCategory private[apidata] (
+        id:          String,
+        name:        String,
+        description: String,
+        parent:      String,
+        targets:     List[Target],
+        groups:      List[JRGroup],
+        categories:  List[JRGroupCategory]
+    ) extends JRGroupCategory
+
+    case class MinimalGroupCategory private[apidata] (
+        id:          String,
+        name:        String,
+        description: String,
+        parent:      String,
+        targets:     List[Target],
+        groups:      List[NodeGroupId],
+        categories:  List[NodeGroupCategoryId]
+    ) extends JRGroupCategory
+
+    def fromFull(
+        category:    FullNodeGroupCategory,
+        parent:      NodeGroupCategoryId,
+        detailLevel: DetailLevel
+    ): JRGroupCategory = {
+      detailLevel match {
+        case FullDetails    =>
+          FullGroupCategory(
+            category.id.value,
+            category.name,
+            category.description,
+            parent.value,
+            otherTargets(category),
+            groupList(category).map(fullGroup => JRGroup.fromGroup(fullGroup.nodeGroup, category.id, None)),
+            subCat(category).map(fromFull(_, category.id, detailLevel))
+          )
+        case MinimalDetails =>
+          MinimalGroupCategory(
+            category.id.value,
+            category.name,
+            category.description,
+            parent.value,
+            otherTargets(category),
+            groupList(category).map(_.nodeGroup.id),
+            subCat(category).map(_.id)
+          )
+      }
+    }
+
+    private[this] def groupList(category: FullNodeGroupCategory):    List[FullGroupTarget]       = {
+      category.ownGroups.values.toList.sortBy(_.nodeGroup.id.serialize)
+    }
+    private[this] def subCat(category: FullNodeGroupCategory):       List[FullNodeGroupCategory] = {
+      category.subCategories.sortBy(_.id.value)
+    }
+    private[this] def otherTargets(category: FullNodeGroupCategory): List[Target]                = {
+      category.allTargets.collect {
+        case (AllTargetExceptPolicyServers | AllPolicyServers | PolicyServerTarget(_) | AllTarget, v) => Target.from(v)
+      }.toList
+    }
+
+    private[apidata] case class Target(
+        id:          String,
+        displayName: String,
+        description: String,
+        enabled:     Boolean,
+        target:      String
+    )
+
+    private[apidata] object Target {
+      def from(target: FullRuleTargetInfo): Target = {
+        Target(
+          target.target.target.target,
+          target.name,
+          target.description,
+          target.isEnabled,
+          target.target.target.target
+        )
+      }
+    }
+  }
+
   final case class JRRuleNodesDirectives(
       id: String, // id is in format uid+rev
 
@@ -867,6 +960,11 @@ trait RudderJsonEncoders {
   implicit val queryEncoder:                    JsonEncoder[JRQuery]                    = DeriveJsonEncoder.gen
   implicit val groupEncoder:                    JsonEncoder[JRGroup]                    = DeriveJsonEncoder.gen
   implicit val objectInheritedObjectProperties: JsonEncoder[JRGroupInheritedProperties] = DeriveJsonEncoder.gen
+
+  implicit val nodeGroupIdEncoder:         JsonEncoder[NodeGroupId]            = JsonEncoder[String].contramap(_.serialize)
+  implicit val nodeGroupCategoryIdEncoder: JsonEncoder[NodeGroupCategoryId]    = JsonEncoder[String].contramap(_.value)
+  implicit val groupCategoryTargetEncoder: JsonEncoder[JRGroupCategory.Target] = DeriveJsonEncoder.gen
+  implicit val groupCategoryEncoder:       JsonEncoder[JRGroupCategory]        = DeriveJsonEncoder.gen
 
   implicit val revisionInfoEncoder: JsonEncoder[JRRevisionInfo] = DeriveJsonEncoder.gen
 }

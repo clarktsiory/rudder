@@ -59,6 +59,7 @@ import com.normation.rudder.domain.properties.PropertyProvider
 import com.normation.rudder.domain.queries.NodeReturnType
 import com.normation.rudder.domain.queries.Query
 import com.normation.rudder.domain.queries.QueryReturnType
+import com.normation.rudder.repository.FullNodeGroupCategory
 import com.normation.rudder.rule.category.RuleCategory
 import com.normation.rudder.rule.category.RuleCategoryId
 import com.normation.rudder.services.queries.CmdbQueryParser
@@ -103,6 +104,39 @@ object JsonQueryObjects {
 
     def update(ruleCategory: RuleCategory) = {
       ruleCategory.using(this).ignoreRedundantPatcherFields.patch
+    }
+  }
+
+  final case class JQGroupCategory(
+      id:          Option[NodeGroupCategoryId] = None,
+      name:        Option[String] = None,
+      description: Option[String] = None,
+      parent:      Option[NodeGroupCategoryId] = None
+  ) {
+
+    def update(category: FullNodeGroupCategory) = {
+      val updateId          = id.getOrElse(category.id)
+      val updateName        = name.getOrElse(category.name)
+      val updateDescription = description.getOrElse(category.description)
+      category.copy(
+        id = updateId,
+        name = updateName,
+        description = updateDescription
+      )
+    }
+
+    def create(defaultId: () => NodeGroupCategoryId): PureResult[FullNodeGroupCategory] = {
+      name
+        .map(
+          FullNodeGroupCategory(
+            id.getOrElse(defaultId()),
+            _,
+            description.getOrElse(""),
+            Nil,
+            Nil
+          )
+        )
+        .notOptionalPure("Could not create group Category, cause: name is not defined")
     }
   }
 
@@ -420,6 +454,7 @@ trait RudderJsonDecoders {
   implicit val groupPropertyDecoder2:           JsonDecoder[GroupProperty]       = JsonDecoder[JQGroupProperty].map(_.toGroupProperty)
   implicit val nodeGroupIdDecoder:              JsonDecoder[NodeGroupId]         = JsonDecoder[String].mapOrFail(x => NodeGroupId.parse(x))
   implicit val groupDecoder:                    JsonDecoder[JQGroup]             = DeriveJsonDecoder.gen
+  implicit val groupCategoryDecoder:            JsonDecoder[JQGroupCategory]     = DeriveJsonDecoder.gen
 
 }
 
@@ -522,6 +557,14 @@ class ZioJsonExtractor(queryParser: CmdbQueryParser with JsonQueryLexer) {
     }
   }
 
+  def extractGroupCategory(req: Req): PureResult[JQGroupCategory] = {
+    if (req.json_?) {
+      parseJson[JQGroupCategory](req)
+    } else {
+      extractGroupCategoryFromParams(req.params)
+    }
+  }
+
   def extractRuleFromParams(params: Map[String, List[String]]): PureResult[JQRule] = {
     for {
       id         <- params.parseString("id", RuleId.parse)
@@ -617,6 +660,20 @@ class ZioJsonExtractor(queryParser: CmdbQueryParser with JsonQueryLexer) {
         enabled,
         params.optGet("category").map(NodeGroupCategoryId.apply),
         source
+      )
+    }
+  }
+
+  def extractGroupCategoryFromParams(params: Map[String, List[String]]): PureResult[JQGroupCategory] = {
+    for {
+      parent <- params.parse("parent", JsonDecoder[NodeGroupCategoryId])
+      id     <- params.parse("id", JsonDecoder[NodeGroupCategoryId])
+    } yield {
+      JQGroupCategory(
+        id,
+        params.optGet("name"),
+        params.optGet("description"),
+        parent
       )
     }
   }

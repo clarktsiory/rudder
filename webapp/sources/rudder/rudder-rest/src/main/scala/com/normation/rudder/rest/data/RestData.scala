@@ -60,47 +60,8 @@ import com.normation.rudder.domain.properties.InheritMode
 import com.normation.rudder.domain.properties.NodeProperty
 import com.normation.rudder.domain.properties.PropertyProvider
 import com.normation.rudder.domain.queries.Query
-import com.normation.rudder.repository.FullNodeGroupCategory
 import com.normation.rudder.rule.category._
 import com.typesafe.config.ConfigValue
-import net.liftweb.common._
-
-final case class RestGroupCategory(
-    id:          Option[NodeGroupCategoryId] = None,
-    name:        Option[String] = None,
-    description: Option[String] = None,
-    parent:      Option[NodeGroupCategoryId] = None
-) {
-
-
-  def update(category: FullNodeGroupCategory) = {
-    val updateId          = id.getOrElse(category.id)
-    val updateName        = name.getOrElse(category.name)
-    val updateDescription = description.getOrElse(category.description)
-    category.copy(
-      id = updateId,
-      name = updateName,
-      description = updateDescription
-    )
-  }
-
-  def create(defaultId: () => NodeGroupCategoryId): Box[FullNodeGroupCategory] = {
-    name match {
-      case Some(name) =>
-        Full(
-          FullNodeGroupCategory(
-            id.getOrElse(defaultId()),
-            name,
-            description.getOrElse(""),
-            Nil,
-            Nil
-          )
-        )
-      case None       =>
-        Failure("Could not create group Category, cause: name is not defined")
-    }
-  }
-}
 
 final case class RestDirective(
     name:             Option[String],
@@ -114,7 +75,6 @@ final case class RestDirective(
     policyMode:       Option[Option[PolicyMode]],
     tags:             Option[Tags]
 ) {
-
 
   val onlyName = name.isDefined &&
     shortDescription.isEmpty &&
@@ -174,7 +134,6 @@ final case class RestGroup(
     category:    Option[NodeGroupCategoryId] = None
 ) {
 
-
   val onlyName = name.isDefined &&
     description.isEmpty &&
     query.isEmpty &&
@@ -201,11 +160,9 @@ final case class RestGroup(
   }
 }
 
-
 final case class RestNodeProperties(
     properties: Option[Seq[NodeProperty]]
 )
-
 
 final case class RestNode(
     properties:     Option[List[NodeProperty]],
@@ -219,7 +176,6 @@ sealed trait NodeStatusAction
 case object AcceptNode extends NodeStatusAction
 case object RefuseNode extends NodeStatusAction
 case object DeleteNode extends NodeStatusAction
-
 
 final case class RestParameter(
     value:       Option[ConfigValue] = None,
@@ -235,7 +191,6 @@ final case class RestParameter(
     updateMode(updateDesc(updateValue(parameter)).withProvider(PropertyProvider.defaultPropertyProvider))
   }
 }
-
 
 final case class RestRule(
     name:             Option[String] = None,
