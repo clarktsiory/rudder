@@ -114,6 +114,13 @@ class RuleApi(
     uuidGen:              StringUuidGenerator
 ) extends LiftApiModuleProvider[API] {
 
+  /**
+    * Helps identify the endpoints that still use lift-json
+    */
+  sealed trait WithLiftJsonExtractor {
+    val restExtractor: RestExtractorService = restExtractorService
+  }
+
   import RestUtils._
 
   def response(function: Box[JValue], req: Req, errorMessage: String, dataName: String)(implicit action: String): LiftResponse = {
@@ -152,17 +159,15 @@ class RuleApi(
     })
   }
 
-  object ListRules extends LiftApiModule0 {
-    val schema        = API.ListRules
-    val restExtractor = restExtractorService
+  object ListRules extends LiftApiModule0 with WithLiftJsonExtractor {
+    val schema = API.ListRules
     def process0(version: ApiVersion, path: ApiPath, req: Req, params: DefaultParams, authzToken: AuthzToken): LiftResponse = {
       serviceV2.listRules(req)
     }
   }
 
-  object CreateRule extends LiftApiModule0 {
-    val schema        = API.CreateRule
-    val restExtractor = restExtractorService
+  object CreateRule extends LiftApiModule0 with WithLiftJsonExtractor {
+    val schema = API.CreateRule
     def process0(version: ApiVersion, path: ApiPath, req: Req, params: DefaultParams, authzToken: AuthzToken): LiftResponse = {
       var action = "createRule"
       val id     = restExtractor.extractId(req)(x => RuleId.parse(x).toBox).map(_.getOrElse(RuleId(RuleUid(uuidGen.newUuid))))
@@ -182,9 +187,8 @@ class RuleApi(
     }
   }
 
-  object RuleDetails extends LiftApiModuleString {
-    val schema        = API.RuleDetails
-    val restExtractor = restExtractorService
+  object RuleDetails extends LiftApiModuleString with WithLiftJsonExtractor {
+    val schema = API.RuleDetails
     def process(
         version:    ApiVersion,
         path:       ApiPath,
@@ -197,9 +201,8 @@ class RuleApi(
     }
   }
 
-  object DeleteRule extends LiftApiModuleString {
-    val schema        = API.DeleteRule
-    val restExtractor = restExtractorService
+  object DeleteRule extends LiftApiModuleString with WithLiftJsonExtractor {
+    val schema = API.DeleteRule
     def process(
         version:    ApiVersion,
         path:       ApiPath,
@@ -212,9 +215,8 @@ class RuleApi(
     }
   }
 
-  object UpdateRule extends LiftApiModuleString {
-    val schema        = API.UpdateRule
-    val restExtractor = restExtractorService
+  object UpdateRule extends LiftApiModuleString with WithLiftJsonExtractor {
+    val schema = API.UpdateRule
     def process(
         version:    ApiVersion,
         path:       ApiPath,
@@ -238,9 +240,8 @@ class RuleApi(
     }
   }
 
-  object GetRuleTree extends LiftApiModule0 {
-    val schema        = API.GetRuleTree
-    val restExtractor = restExtractorService
+  object GetRuleTree extends LiftApiModule0 with WithLiftJsonExtractor {
+    val schema = API.GetRuleTree
     def process0(version: ApiVersion, path: ApiPath, req: Req, params: DefaultParams, authzToken: AuthzToken): LiftResponse = {
       response(
         serviceV6.getCategoryTree,
@@ -251,9 +252,8 @@ class RuleApi(
     }
   }
 
-  object GetRuleCategoryDetails extends LiftApiModuleString {
-    val schema        = API.GetRuleCategoryDetails
-    val restExtractor = restExtractorService
+  object GetRuleCategoryDetails extends LiftApiModuleString with WithLiftJsonExtractor {
+    val schema = API.GetRuleCategoryDetails
     def process(
         version:    ApiVersion,
         path:       ApiPath,
@@ -271,9 +271,8 @@ class RuleApi(
     }
   }
 
-  object DeleteRuleCategory extends LiftApiModuleString {
-    val schema        = API.DeleteRuleCategory
-    val restExtractor = restExtractorService
+  object DeleteRuleCategory extends LiftApiModuleString with WithLiftJsonExtractor {
+    val schema = API.DeleteRuleCategory
     def process(
         version:    ApiVersion,
         path:       ApiPath,
@@ -293,9 +292,8 @@ class RuleApi(
     }
   }
 
-  object UpdateRuleCategory extends LiftApiModuleString {
-    val schema        = API.UpdateRuleCategory
-    val restExtractor = restExtractorService
+  object UpdateRuleCategory extends LiftApiModuleString with WithLiftJsonExtractor {
+    val schema = API.UpdateRuleCategory
     def process(
         version:    ApiVersion,
         path:       ApiPath,
@@ -331,9 +329,8 @@ class RuleApi(
     }
   }
 
-  object CreateRuleCategory extends LiftApiModule0 {
-    val schema        = API.CreateRuleCategory
-    val restExtractor = restExtractorService
+  object CreateRuleCategory extends LiftApiModule0 with WithLiftJsonExtractor {
+    val schema = API.CreateRuleCategory
     def process0(version: ApiVersion, path: ApiPath, req: Req, params: DefaultParams, authzToken: AuthzToken): LiftResponse = {
       val restData = if (req.json_?) {
         for {
