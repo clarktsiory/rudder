@@ -63,6 +63,7 @@ import com.normation.rudder.rest.v1.RestStatus
 import com.normation.rudder.users.CurrentUser
 import com.normation.rudder.users.RudderUserDetail
 import com.normation.rudder.web.snippet.WithCachedResource
+import com.normation.rudder.web.snippet.WithNonce
 import com.normation.zio._
 import java.net.URI
 import java.net.URLConnection
@@ -401,10 +402,12 @@ class Boot extends Loggable {
       defaultSources = ContentSourceRestriction.Self :: Nil,
       imageSources = ContentSourceRestriction.Self :: ContentSourceRestriction.Scheme("data") :: Nil,
       styleSources = ContentSourceRestriction.Self :: ContentSourceRestriction.UnsafeInline :: Nil,
-      scriptSources =
-        ContentSourceRestriction.Self :: ContentSourceRestriction.UnsafeInline :: ContentSourceRestriction.UnsafeEval :: Nil
+      scriptSources = ContentSourceRestriction.Self :: ContentSourceRestriction.Host(
+        "'nonce-8IBTHwOdqNKAWeKl7plt8g==' 'strict-dynamic'"
+      ) :: ContentSourceRestriction.UnsafeEval :: Nil
     )
 
+    LiftRules.snippetDispatch.append(Map("with-nonce" -> WithNonce))
     LiftRules.securityRules = () => {
       SecurityRules(
         https = hsts,
@@ -442,7 +445,8 @@ class Boot extends Loggable {
     // Log CSP violations
     LiftRules.contentSecurityPolicyViolationReport = (r: ContentSecurityPolicyViolation) => {
       ApplicationLogger.warn(
-        s"Content security policy violation: blocked ${r.blockedUri} in ${r.documentUri} because of ${r.violatedDirective} directive"
+        s"Content security policy violation: blocked ${r.blockedUri} in ${r.documentUri} because of ${r.violatedDirective} directive" +
+        s"\nDetails : referrer: ${r.referrer}, blockedUri: ${r.blockedUri}, violatedDirective: ${r.violatedDirective}, originalPolicy: ${r.originalPolicy}"
       )
       Full(OkResponse())
     }

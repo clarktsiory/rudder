@@ -76,18 +76,20 @@ class RegisterToasts {
     toasts match {
       case Nil  => NodeSeq.Empty
       case list =>
-        Script(
-          OnLoad(
-            list
-              .map(t => {
-                t match {
-                  case x: ToastNotification.Error   => JsRaw(s"""createErrorNotification("${x.message}")""").cmd
-                  case x: ToastNotification.Success => JsRaw(s"""createSuccessNotification("${x.message}")""").cmd
-                }
-              })
-              .reduce[JsCmd](_ & _)
+        WithNonce.scriptWithNonce(
+          Script(
+            OnLoad(
+              list
+                .map(t => {
+                  t match {
+                    case x: ToastNotification.Error   => JsRaw(s"""createErrorNotification("${x.message}")""").cmd
+                    case x: ToastNotification.Success => JsRaw(s"""createSuccessNotification("${x.message}")""").cmd
+                  }
+                })
+                .reduce[JsCmd](_ & _)
+            )
           )
-        )
+        )("8IBTHwOdqNKAWeKl7plt8g==")
     }
   }
 }
