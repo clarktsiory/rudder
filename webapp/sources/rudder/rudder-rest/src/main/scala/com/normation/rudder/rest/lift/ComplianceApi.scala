@@ -784,6 +784,7 @@ class ComplianceAPIService(
                 nodeInfos.get(nodeId).map(_.hostname).getOrElse("Unknown node"),
                 ComplianceLevel(noAnswer = rulesForNode.size),
                 compliance.mode,
+                nodeInfos.get(nodeId).flatMap(_.policyMode),
                 (rulesForNode.map { rule =>
                   ByNodeRuleCompliance(
                     rule.id,
@@ -817,6 +818,7 @@ class ComplianceAPIService(
               nodeInfos.get(nodeId).map(_.hostname).getOrElse("Unknown node"),
               ComplianceLevel.sum(status.reports.map(_.compliance)),
               compliance.mode,
+              nodeInfos.get(nodeId).flatMap(_.policyMode),
               status.reports.toSeq.map(r => {
                 ByNodeRuleCompliance(
                   r.ruleId,

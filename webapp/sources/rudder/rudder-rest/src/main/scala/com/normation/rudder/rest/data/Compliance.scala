@@ -314,6 +314,7 @@ final case class ByNodeNodeCompliance(
     name:            String,
     compliance:      ComplianceLevel,
     mode:            ComplianceModeName,
+    policyMode:      Option[PolicyMode],
     nodeCompliances: Seq[ByNodeRuleCompliance]
 )
 
@@ -775,6 +776,7 @@ object JsonCompliance {
     def toJsonV6 = (
       ("id"                    -> n.id.value)
         ~ ("compliance"        -> n.compliance.complianceWithoutPending())
+        ~ ("policyMode"        -> n.policyMode.map(_.name).getOrElse("default"))
         ~ ("complianceDetails" -> percents(n.compliance, CompliancePrecision.Level2))
         ~ ("rules"             -> rules(n.nodeCompliances, 10, CompliancePrecision.Level2))
     )
@@ -793,6 +795,7 @@ object JsonCompliance {
         ~ ("name"              -> n.name)
         ~ ("compliance"        -> n.compliance.complianceWithoutPending(precision))
         ~ ("mode"              -> n.mode.name)
+        ~ ("policyMode"        -> n.policyMode.map(_.name).getOrElse("default"))
         ~ ("complianceDetails" -> percents(n.compliance, precision))
         ~ ("rules"             -> rules(n.nodeCompliances, level, precision))
     )
