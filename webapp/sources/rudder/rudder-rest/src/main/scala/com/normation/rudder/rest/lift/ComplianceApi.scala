@@ -470,8 +470,9 @@ class ComplianceAPIService(
   }
 
   private[this] def getByDirectivesCompliance(
-      directives: Seq[Directive],
-      level:      Option[Int]
+      directives:    Seq[Directive],
+      allDirectives: Map[DirectiveId, (FullActiveTechnique, Directive)], // to compute policy mode for each rule
+      level:         Option[Int]
   ): IOResult[Seq[ByDirectiveCompliance]] = {
     val computedLevel = level.getOrElse(10)
 
@@ -503,11 +504,24 @@ class ComplianceAPIService(
       t5            <- currentTimeMillis
       _             <- TimingDebugLoggerPure.trace(s"getByDirectivesCompliance - findRuleNodeStatusReports in ${t5 - t4} ms")
 
+      allGroups <- nodeGroupRepo.getAllNodeIdsChunk()
+
+      globalPolicyMode <- getGlobalPolicyMode()
+
     } yield {
 
       val reportsByRule = reportsByNode.flatMap { case (_, status) => status.reports }.groupBy(_.ruleId)
       val t6            = System.currentTimeMillis()
       TimingDebugLoggerPure.logEffect.trace(s"getByRulesCompliance - group reports by rules in ${t6 - t5} ms")
+
+      val policyModeByRules = rules.map { rule =>
+        val nodeIds = RoNodeGroupRepository.getNodeIdsChunk(allGroups, rule.targets, nodeInfos).toSet
+        (
+          rule.id,
+          getRulePolicyMode(rule, allDirectives, nodeIds.toSet, nodeInfos, globalPolicyMode)
+        )
+      }.toMap
+
       for {
         // We will now compute compliance for each directive we want
         directive <- directives
@@ -536,6 +550,7 @@ class ComplianceAPIService(
             ruleId,
             ruleName,
             ComplianceLevel.sum(componentsCompliance.map(_.compliance)),
+            policyModeByRules.get(ruleId).flatten,
             componentsDetails
           )
         }
@@ -708,17 +723,21 @@ class ComplianceAPIService(
   }.toBox
 
   def getDirectiveCompliance(directive: Directive, level: Option[Int]): Box[ByDirectiveCompliance] = {
-    getByDirectivesCompliance(Seq(directive), level)
-      .flatMap(
-        _.find(_.id == directive.id).notOptional(s"No reports were found for directive with ID '${directive.id.serialize}'")
-      )
-      .toBox
-  }
+    for {
+      directiveLib <- directiveRepo.getFullDirectiveLibrary()
+      reports      <- getByDirectivesCompliance(Seq(directive), directiveLib.allDirectives, level)
+      report       <-
+        reports.find(_.id == directive.id).notOptional(s"No reports were found for directive with ID '${directive.id.serialize}'")
+    } yield {
+      report
+    }
+  }.toBox
 
   def getDirectivesCompliance(level: Option[Int]): Box[Seq[ByDirectiveCompliance]] = {
     for {
-      directives <- directiveRepo.getFullDirectiveLibrary().map(_.allDirectives.values.map(_._2))
-      reports    <- getByDirectivesCompliance(directives.toSeq, level)
+      directiveLib <- directiveRepo.getFullDirectiveLibrary()
+      directives    = directiveLib.allDirectives.values.map(_._2).toSeq
+      reports      <- getByDirectivesCompliance(directives, directiveLib.allDirectives, level)
     } yield {
       reports
     }

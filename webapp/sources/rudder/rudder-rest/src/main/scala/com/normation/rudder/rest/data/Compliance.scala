@@ -104,6 +104,7 @@ final case class ByDirectiveByRuleCompliance(
     id:         RuleId,
     name:       String,
     compliance: ComplianceLevel,
+    policyMode: Option[PolicyMode],
     components: Seq[ByRuleComponentCompliance]
 )
 
@@ -119,6 +120,7 @@ final case class ByDirectiveByNodeRuleCompliance(
     id:         RuleId,
     name:       String,
     compliance: ComplianceLevel,
+    policyMode: Option[PolicyMode],
     components: Seq[ByRuleByNodeByDirectiveByComponentCompliance]
 )
 
@@ -297,7 +299,13 @@ object GroupComponentCompliance {
                               // Rebuild a Directtive compliance for a Node
                               (
                                 nodeId,
-                                ByDirectiveByNodeRuleCompliance(d.id, d.name, ComplianceLevel.sum(subs.map(_.compliance)), subs)
+                                ByDirectiveByNodeRuleCompliance(
+                                  d.id,
+                                  d.name,
+                                  ComplianceLevel.sum(subs.map(_.compliance)),
+                                  d.policyMode,
+                                  subs
+                                )
                               )
                           }
 
@@ -435,6 +443,7 @@ object JsonCompliance {
       ("id"                    -> directive.id.serialize)
         ~ ("name"              -> directive.name)
         ~ ("compliance"        -> directive.compliance.complianceWithoutPending())
+        ~ ("policyMode"        -> directive.policyMode.map(_.name).getOrElse("default"))
         ~ ("complianceDetails" -> percents(directive.compliance, CompliancePrecision.Level2))
         ~ ("rules"             -> rules(directive.rules, 10, CompliancePrecision.Level2))
         ~ ("nodes"             -> byNodes(directive.nodes, 10, CompliancePrecision.Level2))
@@ -482,6 +491,7 @@ object JsonCompliance {
             ("id"                  -> rule.id.uid.value)
             ~ ("name"              -> rule.name)
             ~ ("compliance"        -> rule.compliance.complianceWithoutPending(precision))
+            ~ ("policyMode"        -> rule.policyMode.map(_.name).getOrElse("default"))
             ~ ("complianceDetails" -> percents(rule.compliance, precision))
             ~ ("components"        -> byNodeByDirectiveByComponents(rule.components, level, precision))
           )
@@ -547,6 +557,7 @@ object JsonCompliance {
             ("id"                  -> rule.id.uid.value)
             ~ ("name"              -> rule.name)
             ~ ("compliance"        -> rule.compliance.complianceWithoutPending(precision))
+            ~ ("policyMode"        -> rule.policyMode.map(_.name).getOrElse("default"))
             ~ ("complianceDetails" -> percents(rule.compliance, precision))
             ~ ("components"        -> components(rule.components, level, precision))
           )
