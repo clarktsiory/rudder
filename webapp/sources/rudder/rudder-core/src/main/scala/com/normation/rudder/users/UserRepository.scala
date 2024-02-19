@@ -515,6 +515,7 @@ class InMemoryUserRepository(userBase: Ref[Map[String, UserInfo]], sessionBase: 
  *   endCause     text
  */
 class JdbcUserRepository(doobie: Doobie) extends UserRepository {
+  import JdbcUserRepository._
   import com.normation.rudder.db.Doobie.DateTimeMeta
   import com.normation.rudder.db.json.implicits._
   import com.normation.rudder.users.UserSerialization._
@@ -603,7 +604,7 @@ class JdbcUserRepository(doobie: Doobie) extends UserRepository {
 
   override def getLastPreviousLogin(userId: String): IOResult[Option[UserSession]] = {
     val sql =
-      sql"""select * from usersessions where userid = ${userId} and enddate is not null order by creationdate desc limit 1"""
+      sql"""select ${userSessionsAll} from usersessions where userid = ${userId} and enddate is not null order by creationdate desc limit 1"""
 
     transactIOResult(s"Error when retrieving information for previous session for '${userId}'")(xa =>
       sql.query[UserSession].option.transact(xa)
@@ -845,4 +846,8 @@ class JdbcUserRepository(doobie: Doobie) extends UserRepository {
         transactIOResult(s"Error when updating user information for '${id}'")(xa => sql.update.run.transact(xa)).unit
     }
   }
+}
+
+object JdbcUserRepository {
+  val userSessionsAll: Fragment = fr"userid, sessionid, creationdate, authmethod, permissions, tenants, enddate, endcause"
 }

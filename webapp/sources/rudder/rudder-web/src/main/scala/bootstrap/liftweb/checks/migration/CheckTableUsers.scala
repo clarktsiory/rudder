@@ -48,6 +48,7 @@ import zio.interop.catz._
  * During 7.3 cycle, we added the registration of users and their sessions in base.
  * This is to allows better security logs on user sessions + allows to de-correlate rudder
  * users from the `rudder-user.xml` file.
+ * In 8.1 we add the tenants column to the UserSessions table.
  */
 class CheckTableUsers(
     doobie: Doobie
@@ -55,7 +56,8 @@ class CheckTableUsers(
 
   import doobie._
 
-  override def description: String = "Check if database tables Users and UserSessions exist"
+  override def description: String =
+    "Check if database tables Users and UserSessions exist and tenants column is present in UserSessions table."
 
   def createUserTables: IOResult[Unit] = {
     val sql1 = sql"""CREATE TABLE IF NOT EXISTS Users (
@@ -85,10 +87,18 @@ class CheckTableUsers(
     transactIOResult(s"Error with 'UserSessions' table creation")(xa => sql2.update.run.transact(xa)).unit
   }
 
+  def addTenantsColumn: IOResult[Unit] = {
+    val sql = sql"""ALTER TABLE UserSessions ADD COLUMN IF NOT EXISTS tenants text;
+      UPDATE UserSessions SET tenants = '' WHERE tenants IS NULL;
+    """
+    transactIOResult(s"Error with 'UserSessions' table adding 'tenants' column")(xa => sql.update.run.transact(xa)).unit
+  }
+
   override def checks(): Unit = {
     val prog = {
       for {
         _ <- createUserTables
+        _ <- addTenantsColumn
       } yield ()
     }
 

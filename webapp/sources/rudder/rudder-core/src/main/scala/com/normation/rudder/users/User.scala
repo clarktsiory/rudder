@@ -115,7 +115,7 @@ case class UserSession(
     creationDate: DateTime,
     authMethod:   String,
     permissions:  List[String],
-    tenants:      String,
+    tenants:      String, // TODO: once https://github.com/Normation/rudder/pull/5391 is merged, change to List[TenantId]
     endDate:      Option[DateTime],
     endCause:     Option[String]
 )
