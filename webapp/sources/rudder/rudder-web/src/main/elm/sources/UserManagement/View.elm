@@ -448,30 +448,6 @@ displayRightPanel model user =
             [ div [ class "btn-container" ]
                 [ button [ class "btn btn-sm btn-danger btn-delete", onClick (OpenDeleteModal user.login) ] [ text "Delete" ]
                 , button
-                    [ class
-                        ("btn btn-sm btn-status-toggle "
-                            ++ (if user.status == Active then
-                                    "btn-default"
-
-                                else
-                                    "btn-primary"
-                               )
-                        )
-                    , onClick
-                        (if user.status == Active then
-                            DisableUser user.login
-
-                         else
-                            ActivateUser user.login
-                        )
-                    ]
-                    [ if user.status == Active then
-                        text "Disable"
-
-                      else
-                        text "Activate"
-                    ]
-                , button
                     [ class "btn btn-sm btn-success btn-save"
                     , type_ "button"
                     , if providerCanEditRoles model provider then
