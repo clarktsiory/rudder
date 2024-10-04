@@ -248,7 +248,7 @@ showBlockTab model parentId block uiInfo techniqueUi =
         liCompositionRule =  \rule -> element "li"
                                            |> addActionStopAndPrevent ("click", MethodCallModified (Block parentId {block | reportingLogic = rule }))
                                            |> appendChild (element "a" |> addClass "dropdown-item" |> appendText (compositionText rule))
-        availableComposition = List.map liCompositionRule [ WeightedReport, FocusReport "", WorstReport WorstReportWeightedSum ]
+        availableComposition = List.map liCompositionRule [ WeightedReport, FocusReport "", WorstReport WorstReportByPercent ]
 
         -- sub-select - focus
         liFocus =  \child ->
