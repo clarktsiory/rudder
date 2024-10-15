@@ -331,11 +331,13 @@ trait UserRepositoryTest extends Specification with Loggable {
     }
 
     // BOB added back from OIDC
-    val dateBobOidc      = DateTime.parse("2023-09-03T03:03:03Z")
-    val traceBobOidc     = EventTrace(actor, dateBobOidc)
-    val dateReload       = DateTime.parse("2023-09-04T04:04:04Z")
-    val traceReload      = EventTrace(actor, dateReload)
-    val userInfosBobOidc = {
+    val dateBobOidc          = DateTime.parse("2023-09-03T03:03:03Z")
+    val traceBobOidc         = EventTrace(actor, dateBobOidc)
+    val dateReload           = DateTime.parse("2023-09-04T04:04:04Z")
+    val traceReload          = EventTrace(actor, dateReload)
+    val dateOidcDeleted      = DateTime.parse("2023-09-05T05:05:05Z")
+    val traceOidcDeleted     = EventTrace(actor, dateOidcDeleted)
+    val userInfosBobOidc     = {
       /*
        * When bob is back from OIDC (ie not in the list of user from the files):
        * - Bob is in the list. In the futur, we may want to resurrect people with "disabled" state, but not until it's manageable from Rudder
@@ -350,6 +352,17 @@ trait UserRepositoryTest extends Specification with Loggable {
             .using(StatusHistory(UserStatus.Disabled, traceBobOidc) :: _)
             .modify(_.managedBy)
             .setTo(AUTH_PLUGIN_NAME_REMOTE)
+
+        case u => u
+      }
+    }
+    val userInfosOidcDeleted = {
+      userInfosBobOidc.map {
+        case u if (u.id == "bob") =>
+          u.modify(_.status)
+            .setTo(UserStatus.Deleted)
+            .modify(_.statusHistory)
+            .using(StatusHistory(UserStatus.Deleted, traceOidcDeleted) :: _)
 
         case u => u
       }
@@ -457,6 +470,12 @@ trait UserRepositoryTest extends Specification with Loggable {
       repo.setExistingUsers(AUTH_PLUGIN_NAME_LOCAL, userFileBobRemoved, traceReload).runNow
       repo.getAll().runNow.toUTC must containTheSameElementsAs(userInfosBobOidc)
     }
+
+    "If users are set to an empty list" >> {
+      repo.setExistingUsers(AUTH_PLUGIN_NAME_REMOTE, List.empty, traceOidcDeleted).runNow
+      repo.getAll().runNow.toUTC must containTheSameElementsAs(userInfosOidcDeleted)
+    }
+
     "If an user is purged, then everything about it is lost and it is created fresh" >> {
       // we only purge deleted users
       (repo.delete(List("bob"), None, Nil, Some(UserStatus.Active), traceBobOidc) *>
