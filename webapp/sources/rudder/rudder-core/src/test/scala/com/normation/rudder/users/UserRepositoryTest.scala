@@ -331,13 +331,11 @@ trait UserRepositoryTest extends Specification with Loggable {
     }
 
     // BOB added back from OIDC
-    val dateBobOidc          = DateTime.parse("2023-09-03T03:03:03Z")
-    val traceBobOidc         = EventTrace(actor, dateBobOidc)
-    val dateReload           = DateTime.parse("2023-09-04T04:04:04Z")
-    val traceReload          = EventTrace(actor, dateReload)
-    val dateOidcDeleted      = DateTime.parse("2023-09-05T05:05:05Z")
-    val traceOidcDeleted     = EventTrace(actor, dateOidcDeleted)
-    val userInfosBobOidc     = {
+    val dateBobOidc      = DateTime.parse("2023-09-03T03:03:03Z")
+    val traceBobOidc     = EventTrace(actor, dateBobOidc)
+    val dateReload       = DateTime.parse("2023-09-04T04:04:04Z")
+    val traceReload      = EventTrace(actor, dateReload)
+    val userInfosBobOidc = {
       /*
        * When bob is back from OIDC (ie not in the list of user from the files):
        * - Bob is in the list. In the futur, we may want to resurrect people with "disabled" state, but not until it's manageable from Rudder
@@ -356,9 +354,31 @@ trait UserRepositoryTest extends Specification with Loggable {
         case u => u
       }
     }
+
+    // William is added from OIDC
+    val dateWilliamOidc      = DateTime.parse("2023-09-05T05:05:05Z")
+    val traceWilliamOidc     = EventTrace(actor, dateWilliamOidc)
+    val userInfosWilliamOidc = {
+      // Alice is added along with Bob
+      userInfosBobOidc :+ UserInfo(
+        "william",
+        dateWilliamOidc,
+        UserStatus.Active,
+        AUTH_PLUGIN_NAME_REMOTE,
+        None,
+        None,
+        None,
+        StatusHistory(UserStatus.Active, traceWilliamOidc) :: Nil,
+        Json.Obj()
+      )
+    }
+
+    // All OIDC users deleted
+    val dateOidcDeleted      = DateTime.parse("2023-09-06T06:06:06Z")
+    val traceOidcDeleted     = EventTrace(actor, dateOidcDeleted)
     val userInfosOidcDeleted = {
-      userInfosBobOidc.map {
-        case u if (u.id == "bob") =>
+      userInfosWilliamOidc.map {
+        case u if u.id == "bob" || u.id == "william" =>
           u.modify(_.status)
             .setTo(UserStatus.Deleted)
             .modify(_.statusHistory)
@@ -369,26 +389,26 @@ trait UserRepositoryTest extends Specification with Loggable {
     }
 
     // BOB deleted, then purged and added back in OIDC
-    val dateBob2      = DateTime.parse("2023-09-05T05:05:05Z")
-    val traceBob2     = EventTrace(actor, dateBob2)
-    val userInfosBob2 = {
+    val dateBobPurged      = DateTime.parse("2023-09-07T07:07:07Z")
+    val traceBobPurged     = EventTrace(actor, dateBobPurged)
+    val userInfosBobPurged = {
       /*
        * When bob is purged and added back from OIDC (ie not in the list of user from the files):
        * - Bob is in the list, but with a status "active"
        * - history lines only contains the creation one
        * - other users are not changed
        */
-      userInfosBobOidc.map {
+      userInfosOidcDeleted.map {
         case u if (u.id == "bob") =>
           UserInfo(
             u.id,
-            dateBob2,
+            dateBobPurged,
             UserStatus.Active,
             AUTH_PLUGIN_NAME_REMOTE,
             None,
             None,
             None,
-            StatusHistory(UserStatus.Active, traceBob2) :: Nil,
+            StatusHistory(UserStatus.Active, traceBobPurged) :: Nil,
             Json.Obj()
           )
 
@@ -471,6 +491,11 @@ trait UserRepositoryTest extends Specification with Loggable {
       repo.getAll().runNow.toUTC must containTheSameElementsAs(userInfosBobOidc)
     }
 
+    "If an user is also added in the other module" >> {
+      repo.addUser(AUTH_PLUGIN_NAME_REMOTE, "william", traceWilliamOidc).runNow
+      repo.getAll().runNow.toUTC must containTheSameElementsAs(userInfosWilliamOidc)
+    }
+
     "If users are set to an empty list" >> {
       repo.setExistingUsers(AUTH_PLUGIN_NAME_REMOTE, List.empty, traceOidcDeleted).runNow
       repo.getAll().runNow.toUTC must containTheSameElementsAs(userInfosOidcDeleted)
@@ -480,8 +505,10 @@ trait UserRepositoryTest extends Specification with Loggable {
       // we only purge deleted users
       (repo.delete(List("bob"), None, Nil, Some(UserStatus.Active), traceBobOidc) *>
       repo.purge(List("bob"), None, Nil, traceBobOidc)).runNow
-      repo.setExistingUsers(AUTH_PLUGIN_NAME_REMOTE, List("bob"), traceBob2).runNow
-      repo.getAll().runNow.toUTC must containTheSameElementsAs(userInfosBob2)
+      repo.getAll().runNow must beLike(_.map(_.id) must not(contain("bob")))
+
+      repo.setExistingUsers(AUTH_PLUGIN_NAME_REMOTE, List("bob"), traceBobPurged).runNow
+      repo.getAll().runNow.toUTC must containTheSameElementsAs(userInfosBobPurged)
     }
   }
 
@@ -513,16 +540,15 @@ trait UserRepositoryTest extends Specification with Loggable {
 
     "deleting+purging all users not logged in since a date in the future should remove all users" >> {
       // set delete trace event to "dateInit" to make it simpler to know when the "deleted before" must be set to
-      (
-        repo
-          .delete(Nil, Some(dateInit.plusYears(1)), Nil, None, EventTrace(actor, dateInit))
-          .flatMap(users => errors.effectUioUnit(logger.debug(s"Users were marked deleted: ${users}"))) *>
-        errors.effectUioUnit(println("**** delete done")) *>
-        repo
-          .purge(Nil, Some(dateInit.plusSeconds(1)), Nil, EventTrace(actor, DateTime.now()))
-          .flatMap(users => errors.effectUioUnit(logger.debug(s"Users were purged: ${users}")))
-        *> errors.effectUioUnit(println("**** purge done"))
-      ).runNow
+      repo
+        .delete(Nil, Some(dateInit.plusYears(1)), Nil, None, EventTrace(actor, dateInit))
+        .tap(users => errors.effectUioUnit(logger.debug(s"Users were marked deleted: ${users}")))
+        .runNow must containTheSameElementsAs(List("alice", "charlie", "mallory", "bob")) // william is already deleted
+
+      repo
+        .purge(Nil, Some(dateInit.plusYears(1)), Nil, EventTrace(actor, DateTime.now()))
+        .tap(users => errors.effectUioUnit(logger.debug(s"Users were purged: ${users}")))
+        .runNow must containTheSameElementsAs(List("alice", "charlie", "mallory", "bob", "william"))
 
       repo.getAll().runNow must beEmpty
     }
