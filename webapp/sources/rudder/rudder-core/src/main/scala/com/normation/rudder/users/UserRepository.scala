@@ -752,8 +752,8 @@ class JdbcUserRepository(doobie: Doobie) extends UserRepository {
   override def addUser(origin: String, user: String, trace: EventTrace, isCaseSensitive: Boolean): IOResult[Boolean] = {
     transactIOResult(s"Error when adding user '${user}' from '${origin}'") { xa =>
       (for {
-        current  <- select(List.empty, None, defaultToNone = false, List.empty, Some(fr"managedby = ${origin}"))
-        added     = current.map { case (id, _) => id } :+ user
+        current  <- fr"select id from users where managedby = ${origin}".query[String].to[List]
+        added     = current :+ user
         notAdded <- setUsers(origin, added, trace, isCaseSensitive)
       } yield {
         !notAdded.contains(user)
