@@ -166,7 +166,7 @@ class ApiAccountApiServiceV1(
     val generateId     = ApiAccountId(uuidGen.newUuid).succeed
     val generateSecret = ApiTokenSecret.generate(tokenGenerator).transformInto[ClearTextSecret].succeed
     def generateToken(secret: ClearTextSecret): IOResult[ApiTokenHash] =
-      ApiTokenHash.hash(secret.transformInto[ApiTokenSecret]).succeed
+      ApiTokenHash.fromSecret(secret.transformInto[ApiTokenSecret]).succeed
 
     new ApiAccountMapping(getNow, generateId, generateSecret, generateToken)
   }

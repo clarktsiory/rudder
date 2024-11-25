@@ -983,7 +983,7 @@ class MockApiAccountService() {
         ApiAccountId("system-token"),
         ApiAccountKind.System, // must be filtered out
         ApiAccountName("system"),
-        Some(ApiTokenHash("v2:system-hashed-token")),
+        Some(ApiTokenHash.fromHashValue("v2:system-hashed-token")),
         "system",
         isEnabled = true,
         creationDate = accountCreationDate,
@@ -995,7 +995,7 @@ class MockApiAccountService() {
         ApiAccountId("user1"),
         ApiAccountKind.PublicApi(ApiAuthorization.RW, None),
         ApiAccountName("user one"),
-        Some(ApiTokenHash("v2:some-hashed-token")),
+        Some(ApiTokenHash.fromHashValue("v2:some-hashed-token")),
         "number one user",
         isEnabled = true,
         creationDate = accountCreationDate,
@@ -1010,7 +1010,7 @@ class MockApiAccountService() {
           Some(accountExpireDate)
         ),
         ApiAccountName("user2"),
-        Some(ApiTokenHash("v2:some-hashed-token")),
+        Some(ApiTokenHash.fromHashValue("v2:some-hashed-token")),
         "number one user",
         isEnabled = true,
         creationDate = accountCreationDate,
@@ -1039,7 +1039,7 @@ class MockApiAccountService() {
         case h :: t => (ClearTextSecret(h), t)
       }
 
-      def generateToken(secret: ClearTextSecret): IOResult[ApiTokenHash] = ApiTokenHash("token-" + secret.value).succeed
+      def generateToken(secret: ClearTextSecret): IOResult[ApiTokenHash] = ApiTokenHash.disabled().succeed
 
       new ApiAccountMapping(creationDate, generateId, generateSecret, generateToken)
     }

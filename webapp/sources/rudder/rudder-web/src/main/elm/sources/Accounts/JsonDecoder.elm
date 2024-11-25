@@ -32,7 +32,7 @@ decodeAccount datePickerInfo =
         |> optional "kind" string "public"
         |> required "status" decodeEnabledStatus
         |> required "creationDate" string
-        |> required "token" (string |> andThen toToken)
+        |> optional "token" (string |> andThen toToken) Token.ClearText
         |> optional "tokenGenerationDate" (maybe string) Nothing
         |> custom (decodeExpirationPolicy datePickerInfo)
         |> optional "acl" (map Just (list <| decodeAcl)) Nothing
@@ -98,6 +98,7 @@ parseToken str =
     "2" -> Token.Hashed
     "1" -> Token.ClearText
     _   -> Token.New str
+
 
 toToken : String -> Decoder Token
 toToken str =

@@ -60,7 +60,7 @@ class ApiAccountTest extends Specification with DateTimeCodecs {
     now.succeed,
     accountId.succeed,
     secret.transformInto[ClearTextSecret].succeed,
-    s => ApiTokenHash.hash(s.transformInto[ApiTokenSecret]).succeed
+    s => ApiTokenHash.fromSecret(s.transformInto[ApiTokenSecret]).succeed
   )
 
   "New account with the minimal of data get a new id and are limited to one month" >> {
@@ -80,7 +80,7 @@ class ApiAccountTest extends Specification with DateTimeCodecs {
     val (account, _) = mapper.fromNewApiAccount(data).runNow
 
     account.id === accountId
-    account.token === Some(ApiTokenHash.hash(secret))
+    account.token === Some(ApiTokenHash.fromSecret(secret))
     account.kind match {
       case ApiAccountKind.PublicApi(_, expirationDate) =>
         expirationDate === Some(now.plusMonths(1))
@@ -109,7 +109,7 @@ class ApiAccountTest extends Specification with DateTimeCodecs {
     val (account, _) = mapper.fromNewApiAccount(data).runNow
 
     account.id === id
-    account.token === Some(ApiTokenHash.hash(secret))
+    account.token === Some(ApiTokenHash.fromSecret(secret))
     account.kind match {
       case ApiAccountKind.PublicApi(_, expirationDate) =>
         expirationDate === Some(expiration.transformInto[DateTime])
