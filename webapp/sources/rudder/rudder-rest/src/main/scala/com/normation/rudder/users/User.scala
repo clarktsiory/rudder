@@ -123,6 +123,7 @@ case class RudderUserDetail(
 
   override val (getUsername, getPassword, getAuthorities) = account match {
     case RudderAccount.User(login, password) => (login, password, RudderAuthType.User.grantedAuthorities)
+    // We can default to "" as this value is ot used for authentication.
     case RudderAccount.Api(api)              =>
       (api.name.value, api.token.flatMap(_.exposeHash()).getOrElse(""), RudderAuthType.Api.grantedAuthorities)
   }
