@@ -72,8 +72,9 @@ final case class ApiAccountName(value: String) extends AnyVal
  * All tokens are 32 alphanumeric characters, optionally
  * followed by a "-system" suffix, indicating a system token.
  *
+ * Use the [[exposeSecret()]] method to retrieve the held value
  */
-final case class ApiTokenSecret(private val secret: String) {
+final class ApiTokenSecret(private val secret: String) {
   // Avoid printing the value in logs, regardless of token type
   override def toString: String = "[REDACTED ApiTokenSecret]"
 
@@ -97,7 +98,7 @@ object ApiTokenSecret {
 
   def generate(tokenGenerator: TokenGenerator, suffix: String = ""): ApiTokenSecret = {
     val completeSuffix = if (suffix.isEmpty) "" else "-" + suffix
-    ApiTokenSecret(tokenGenerator.newToken(tokenSize) + completeSuffix)
+    new ApiTokenSecret(tokenGenerator.newToken(tokenSize) + completeSuffix)
   }
 }
 

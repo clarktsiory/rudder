@@ -876,7 +876,7 @@ class RestAuthenticationFilter(
 
             case token =>
               // try to authenticate
-              val apiToken      = ApiTokenSecret(token)
+              val apiToken      = new ApiTokenSecret(token)
               val apiTokenHash  = apiToken.toHash()
               val systemAccount = apiTokenRepository.getSystemAccount
               if (systemAccount.token.exists(_.equalsToken(apiTokenHash))) { // system token with super authz

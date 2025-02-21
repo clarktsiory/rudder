@@ -58,19 +58,19 @@ class TestApiToken extends Specification {
       token.exposeSecret() must beEqualTo("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-end")
     }
     "be hidden in strings" in {
-      val token = ApiTokenSecret("UBeJJbm1tPDwILWVHXqBdgmIm3s4xjtY")
+      val token = new ApiTokenSecret("UBeJJbm1tPDwILWVHXqBdgmIm3s4xjtY")
       token.toString() must beEqualTo("[REDACTED ApiTokenSecret]")
     }
     "be partly hidden in controlled exposure" in {
-      val token          = ApiTokenSecret("UBeJJbm1tPDwILWVHXqBdgmIm3s4xjtY")
+      val token          = new ApiTokenSecret("UBeJJbm1tPDwILWVHXqBdgmIm3s4xjtY")
       token.exposeSecretBeginning must beEqualTo("UBeJ[SHORTENED ApiTokenSecret]")
-      val shortToken     = ApiTokenSecret("test")
+      val shortToken     = new ApiTokenSecret("test")
       shortToken.exposeSecretBeginning must beEqualTo("test[SHORTENED ApiTokenSecret]")
-      val veryShortToken = ApiTokenSecret("t")
+      val veryShortToken = new ApiTokenSecret("t")
       veryShortToken.exposeSecretBeginning must beEqualTo("t[SHORTENED ApiTokenSecret]")
     }
     "be hashed" in {
-      val token = ApiTokenSecret("UBeJJbm1tPDwILWVHXqBdgmIm3s4xjtY")
+      val token = new ApiTokenSecret("UBeJJbm1tPDwILWVHXqBdgmIm3s4xjtY")
       token.toHash() must beEqualTo(
         ApiTokenHash.fromHashValue(
           "v2:100caab9f3996edb04119ad4b2647b45150b10f75007b86bd82cdd0b7a9b009e2d5327115b3153bc4dc31bbbc775c6257f63f64a31f3c2d3924f11e8d24855bc"

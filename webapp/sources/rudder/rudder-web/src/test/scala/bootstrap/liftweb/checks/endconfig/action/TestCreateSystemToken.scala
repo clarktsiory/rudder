@@ -47,7 +47,7 @@ import org.specs2.runner.JUnitRunner
 class TestCreateSystemToken extends Specification {
 
   private val token    = "ohhcRCnPiRP67CuuxKDVMuig0AQqjKVo-system"
-  private val apiToken = ApiTokenSecret(token)
+  private val apiToken = new ApiTokenSecret(token)
 
   "When writing the system tokens, we" should {
     "generate proper header and token files" in File.temporaryDirectory("rudder-test-system-token-") { tmpDir =>

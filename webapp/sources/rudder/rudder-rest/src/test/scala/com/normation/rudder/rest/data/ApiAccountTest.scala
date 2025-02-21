@@ -53,7 +53,7 @@ class ApiAccountTest extends Specification with DateTimeCodecs {
 
   private val now       = DateTime.parse("2025-02-10T10:10:10Z")
   private val accountId = ApiAccountId("account1")
-  private val secret    = ApiTokenSecret("token1")
+  private val secret    = new ApiTokenSecret("token1")
 
   // test transformer with fixed id generation, fix token id, fixe date now
   private val mapper = new ApiAccountMapping(

@@ -195,7 +195,7 @@ object ClearTextSecret {
   implicit val encoderClearTextSecret:        JsonEncoder[ClearTextSecret]                 = JsonEncoder.string.contramap(_.value)
   implicit val transformerFromApiTokenSecret: Transformer[ApiTokenSecret, ClearTextSecret] = apiTokenSecret =>
     ClearTextSecret(apiTokenSecret.exposeSecret())
-  implicit val transformer:                   Transformer[ClearTextSecret, ApiTokenSecret] = clearText => ApiTokenSecret(clearText.value)
+  implicit val transformer:                   Transformer[ClearTextSecret, ApiTokenSecret] = clearText => new ApiTokenSecret(clearText.value)
 }
 
 object ApiAccountDetails extends ApiAccountCodecs {
