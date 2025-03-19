@@ -16,6 +16,7 @@
         height: initial;
       }
     </style>
+    <script data-lift="with-cached-resource" src="/javascript/rudder/elm/rudder-nodes.js"></script>
   </head>
   <div class="rudder-template">
     <div class="one-col">
@@ -48,6 +49,8 @@
                         <div class="table-container">
                           <div data-lift="node.Nodes.table"></div>
                         </div>
+                        <div id="elm-list-container">
+                        </div>
                       </div>
                       <div id="node_search" class="tab-pane">
                           <div data-lift="node.SearchNodes.head"></div>
@@ -78,4 +81,17 @@
     </lift:ignore>
     <div id="createGroupContainer"></div>
   </div>
+
+  <script>
+    $(document).ready(function(){
+      const nodesMain = document.getElementById("elm-list-container")
+      const nodesInitValues = {
+        contextPath    : contextPath
+      , hasReadRights : true
+      , policyMode : "default"
+      }
+
+      const nodesApp = Elm.Nodes.init({node: nodesMain, flags: nodesInitValues});
+    });
+  </script>
 </lift:surround>

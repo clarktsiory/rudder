@@ -90,6 +90,9 @@ filterSearch filterString searchFields =
         String.contains searchString stringToCheck
 
 
+-- TODO : Pagination, export buttons, better columns edit
+
+
 
 --
 -- COMPLIANCE TABLES
