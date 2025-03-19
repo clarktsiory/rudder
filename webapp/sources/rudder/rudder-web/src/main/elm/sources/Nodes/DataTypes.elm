@@ -28,7 +28,8 @@ type SortBy
 type alias UI =
     { hasReadRights : Bool
     , loading : Bool
-    , filters : TableFilters SortBy
+
+    -- , filters : TableFilters SortBy
     , editColumns : Bool
     , columns : List SortBy
     }

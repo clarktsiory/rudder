@@ -40,6 +40,7 @@
             "matthewsj/elm-ordering": "2.0.0",
             "mcordova47/elm-natural-ordering": "1.1.0",
             "mercurymedia/elm-datetime-picker": "8.0.1",
+            "mgold/elm-nonempty-list": "4.2.0",
             "pablen/toasty": "1.2.0",
             "pablohirafuji/elm-markdown": "2.0.5",
             "pablohirafuji/elm-syntax-highlight": "3.5.0",

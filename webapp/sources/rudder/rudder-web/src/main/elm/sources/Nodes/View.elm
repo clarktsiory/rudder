@@ -19,9 +19,6 @@ view model =
             ui =
                 model.ui
 
-            filters =
-                ui.filters
-
             editColumnsBtn =
                 if ui.editColumns then
                     button [ class "btn btn-success btn-sm btn-icon", style "min-width" "120px", onClick (UpdateUI { ui | editColumns = False }) ]
@@ -66,17 +63,18 @@ view model =
                             div [ class "main-table tab-table-content col-sm-12" ]
                                 [ div [ class "table-header extra-filters" ]
                                     [ div [ class "main-filters" ]
-                                        [ input [ type_ "text", placeholder "Filter", class "input-sm form-control", onInput (\s -> UpdateUI { ui | filters = { filters | filter = s } }) ] []
+                                        [ input
+                                            [ type_ "text"
+                                            , placeholder "Filter"
+                                            , class "input-sm form-control"
+
+                                            -- , onInput (\s -> UpdateUI { ui | filters = { filters | filter = s } })
+                                            ]
+                                            []
                                         , editColumnsBtn
                                         , button [ class "btn btn-default btn-sm btn-refresh", onClick (CallApi getNodeDetails) ] [ i [ class "fa fa-refresh" ] [] ]
                                         ]
                                     , displayColumnsEdit
-                                    ]
-                                , div [ class "table-container" ]
-                                    [ table [ class "no-footer dataTable" ]
-                                        [ thead [] [ nodesTableHeader model.ui ]
-                                        , tbody [] (buildNodesTable model)
-                                        ]
                                     ]
                                 ]
                         ]
