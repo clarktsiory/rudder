@@ -977,6 +977,12 @@ limitations under the License.
       <version>${difflicious-version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>dev.zio</groupId>
+      <artifactId>zio-json-golden_${scala-binary-version}</artifactId>
+      <version>${zio-json-version}</version>
+      <scope>test</scope>
+    </dependency>
 
     <!--
         included to use slf4j native backend
