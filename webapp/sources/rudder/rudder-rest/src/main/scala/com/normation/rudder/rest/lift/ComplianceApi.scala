@@ -517,7 +517,7 @@ class ComplianceAPIService(
        val bidule = groupsComponents.flatMap { case (nodeId, c) => c.subComponents.map(sub => (nodeId, sub)) }
          .groupBy(_._2.componentName)
        ByRuleBlockCompliance(
-         name,
+         BlockName(name),
          groupsComponents.map(_._2.reportingLogic).head,
          bidule.flatMap(c => components(nodeFacts, globalMode)(c._1, c._2)).toList
        ) :: Nil
@@ -525,7 +525,7 @@ class ComplianceAPIService(
                Nil
              } else {
                ByRuleValueCompliance(
-                 name,
+                 ValueName(name),
                  ComplianceLevel.sum(
                    uniqueComponents.map(_._2.compliance)
                  ), // here, we finally group by nodes for each components !

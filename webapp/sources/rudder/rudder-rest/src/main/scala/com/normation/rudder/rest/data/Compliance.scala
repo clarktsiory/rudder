@@ -62,6 +62,7 @@ import org.apache.commons.csv.QuoteMode
 import scala.collection.immutable
 import zio.json.JsonCodec
 import zio.json.JsonEncoder
+import zio.json.internal.Write
 import zio.syntax.ToZio
 
 /**
@@ -194,22 +195,22 @@ final case class ByRuleDirectiveCompliance(
 )
 
 sealed trait ByRuleComponentCompliance extends ComponentComplianceByNode {
-  def name:       String
+  def name:       ComponentName
   def compliance: ComplianceLevel
 }
 
 final case class ByRuleBlockCompliance(
-    name:           String,
+    name:           BlockName,
     reportingLogic: ReportingLogic,
     subComponents:  Seq[ByRuleComponentCompliance]
 ) extends ByRuleComponentCompliance with BlockComplianceByNode[ByRuleComponentCompliance] {
   override def subs: List[ByRuleComponentCompliance & ComponentCompliance] = subComponents.toList
 
-  override def componentName: String = name
+  override def componentName: String = name.value
 }
 
 final case class ByRuleValueCompliance(
-    name:       BlockName,
+    name:       ValueName,
     compliance: ComplianceLevel,
     nodes:      List[ByRuleNodeCompliance]
 ) extends ByRuleComponentCompliance {
@@ -261,26 +262,21 @@ sealed trait ByRuleByNodeByDirectiveByComponentCompliance extends ComponentCompl
 }
 
 final case class ByRuleByNodeByDirectiveByBlockCompliance(
-    name:           String,
+    name:           BlockName,
     reportingLogic: ReportingLogic,
     subComponents:  Seq[ByRuleByNodeByDirectiveByComponentCompliance]
 ) extends ByRuleByNodeByDirectiveByComponentCompliance with BlockCompliance[ByRuleByNodeByDirectiveByComponentCompliance] {
   override def subs: List[ByRuleByNodeByDirectiveByComponentCompliance & ComponentCompliance] = subComponents.toList
 
-  override def componentName: String = name
+  override def componentName: String = name.value
 }
 
 final case class ByRuleByNodeByDirectiveByValueCompliance(
-    name:       ComponentName,
+    name:       ValueName,
     compliance: ComplianceLevel,
     values:     Seq[ComponentValueStatusReport]
 ) extends ByRuleByNodeByDirectiveByComponentCompliance {
-  override def componentName: String = {
-    name match {
-      case b: BlockName => b.value
-      case v: ValueName => v.value
-    }
-  }
+  override def componentName: String = name.value
 
   override def allReports: List[ReportType] = values.flatMap(c => c.messages.map(_ => c.status)).toList
 }
@@ -485,7 +481,7 @@ object CsvCompliance {
                 BlockName(block.mkString(",")), // ??? - did we specify/check somewhere that naming choice ? TODO: add a test
                 ComponentName(component.name),
                 NodeField(node),
-                ValueName(value),
+                ValueName(value.componentValue),
                 StatusField(report),
                 MessageField(report)
               )
@@ -526,7 +522,12 @@ object CsvCompliance {
   object ComponentName extends CsvField[ComponentName] {
     def apply(name: String): ComponentName = name
 
-    given jsonEncoder: JsonEncoder[ComponentName] = ???
+    given JsonEncoder[ComponentName] with {
+      override def unsafeEncode(a: ComponentName, indent: Option[Int], out: Write): Unit = a match {
+        case b: BlockName => JsonEncoder[BlockName].unsafeEncode(a, indent, out)
+        case v: ValueName => JsonEncoder[ValueName].unsafeEncode(a, indent, out)
+      }
+    }
   }
 
   opaque type BlockName = String
@@ -536,15 +537,19 @@ object CsvCompliance {
     extension (blockName: BlockName) {
       def value: String = blockName
     }
+
+    given jsonCodec: JsonCodec[BlockName] = JsonCodec.string
   }
 
   opaque type ValueName = String
   object ValueName extends CsvField[ValueName] {
-    def apply(value: ComponentValueStatusReport) = value.componentValue
+    def apply(value: String): ValueName = value
 
     extension (valueName: ValueName) {
       def value: String = valueName
     }
+
+    given jsonCodec: JsonCodec[ValueName] = JsonCodec.string
   }
 
   opaque type NodeField = String
@@ -622,6 +627,8 @@ object ComplianceFormat extends Enum[ComplianceFormat] {
  * This is used for serialization of compliance API object. These are pure DTO
  */
 object ComplianceApiData {
+  import ComponentName.given
+  
   // generic transformers
   private given complianceLevelTransformer(using precision: CompliancePrecision): Transformer[ComplianceLevel, Double] =
     _.complianceWithoutPending(precision)
@@ -816,7 +823,7 @@ object ComplianceApiData {
     }
 
     final case class ByRuleComponentComplianceApi(
-        name:              String,
+        name:              ComponentName,
         compliance:        Double,
         complianceDetails: ComplianceSerializable,
         components:        Option[Seq[ByRuleComponentComplianceApi]],
@@ -947,7 +954,7 @@ object ComplianceApiData {
     }
 
     final case class ByRuleComponentComplianceApi(
-        name:              String,
+        name:              ComponentName,
         compliance:        Double,
         complianceDetails: ComplianceSerializable,
         components:        Option[Seq[ByRuleComponentComplianceApi]],
@@ -1134,7 +1141,7 @@ object ComplianceApiData {
     }
 
     final case class ByRuleComponentComplianceApi(
-        name:              String,
+        name:              ComponentName,
         compliance:        Double,
         complianceDetails: ComplianceSerializable,
         components:        Option[Seq[ByRuleComponentComplianceApi]],
